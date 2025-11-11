@@ -1,0 +1,62 @@
+---
+title: Roles
+description: Role-based access control for account management
+---
+
+# Roles
+
+<Note>
+**Status:** In Development - This feature is currently under development and will be available in a future release.
+</Note>
+
+## Overview
+
+Roles in Quiverstone will provide fine-grained access control for managing accounts and organizations. Roles define what actions users can perform and which resources they can access.
+
+## Planned Features
+
+### Role Types
+- **Admin** - Full access to all Quiverstone features
+- **Manager** - Manage accounts and organizations
+- **Viewer** - Read-only access to accounts and resources
+- **Operator** - Execute operations but limited configuration access
+- **Custom** - Define custom role permissions
+
+### Permission Scopes
+- Organization-level permissions
+- Account-level permissions
+- Resource-level permissions
+- Action-based permissions (read, write, execute, delete)
+
+### Role Assignment
+- Assign roles to individual users
+- Assign roles to groups
+- Assign roles to teams
+- Time-based role assignments
+- Conditional role activation
+
+## Use Cases
+
+**For MSPs:**
+- Assign customer-specific roles to team members
+- Limit junior staff to read-only access
+- Grant managers full access to specific customer organizations
+
+**For Enterprises:**
+- Implement least-privilege access patterns
+- Separate development and production access
+- Audit role assignments and usage
+
+**For Platform Teams:**
+- Define operator roles for on-call staff
+- Create viewer roles for stakeholders
+- Implement approval workflows for sensitive operations
+
+## Coming Soon
+
+This feature is being actively developed. Documentation will be updated as the feature becomes available.
+
+For current access control, use:
+- Organization Access Roles (at organization level)
+- Account Access Roles (at account level)
+- IAM role assumption controls

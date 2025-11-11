@@ -1,0 +1,126 @@
+---
+title: Introduction
+description: Welcome to Quiverstone - Multi-Account AWS Management Platform
+---
+
+# Quiverstone
+
+Quiverstone is a comprehensive multi-account AWS management platform designed for Managed Service Providers (MSPs), cloud consultants, and organizations managing multiple AWS environments.
+
+## What is Quiverstone?
+
+Quiverstone provides centralized visibility, access management, and operational control across hundreds or thousands of AWS accounts. Whether you're an MSP managing customer organizations or an enterprise with complex multi-account structures, Quiverstone simplifies AWS account management.
+
+## Key Features
+
+### Multi-Account Management
+- **Organization Inventory** - Automatically discover and import AWS Organization member accounts
+- **Stand-Alone Accounts** - Manage individual AWS accounts outside of organizations
+- **Centralized Dashboard** - Single pane of glass for all your AWS accounts
+
+### Customer & Organization Management
+- **Customer Tracking** - Manage customer relationships, contacts, and business information
+- **Organization Hierarchy** - Support for AWS Organizations with delegated administrator accounts
+- **Flexible Account Types** - MSP, Professional Services, Consulting, Resale, and more
+
+### Access Control & Security
+- **Role-Based Access** - Fine-grained permissions with custom role mappings
+- **Secure Role Assumption** - Direct and chained IAM role assumption
+- **External ID Support** - Enhanced security for cross-account access
+- **Audit Trails** - All actions logged via CloudTrail
+
+### Inventory & Discovery
+- **Automatic Discovery** - Import accounts from AWS Organizations automatically
+- **Resource Inventory** - Collect and track AWS resources across accounts
+- **Configuration Tracking** - Monitor account settings and configurations
+
+## Who is Quiverstone For?
+
+**Managed Service Providers (MSPs)**
+- Manage multiple customer AWS Organizations from one platform
+- Provide customers with self-service role deployment via Service Catalog
+- Track customer relationships and billing information
+
+**Cloud Consultants & Professional Services**
+- Manage project-based AWS environments
+- Quick setup for temporary customer engagements
+- Standardized deployment templates
+
+**Enterprise Organizations**
+- Centralize management of internal multi-account structures
+- Simplify access control across organizational units
+- Automate account onboarding and configuration
+
+**DevOps & Platform Teams**
+- Streamline multi-account access for development teams
+- Standardize role configurations across environments
+- Quick role assumption for troubleshooting
+
+## Core Concepts
+
+### Organizations
+AWS Organizations in Quiverstone represent management or delegated administrator accounts. Organizations can automatically discover and import their member accounts through inventory roles.
+
+### Accounts
+Individual AWS accounts tracked in Quiverstone. Accounts can be:
+- **Inventoried** - Auto-discovered from AWS Organizations
+- **Stand-Alone** - Manually added individual accounts
+- **Reference Only** - Tracked for documentation without access configured
+
+### Customers
+Business entities that own or are associated with organizations and accounts. Track customer information, contacts, and custom attributes.
+
+### Roles & Permissions
+Quiverstone uses IAM roles for all AWS access. Configure inventory roles for discovery and access roles for resource management.
+
+### Teams & Groups
+*In Development* - Organize users into teams and groups for collaborative account management.
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card title="Setup Organizations" icon="building" href="/setup/organizations">
+    Add your AWS Organizations and configure inventory roles
+  </Card>
+  <Card title="Setup Accounts" icon="server" href="/setup/accounts">
+    Add individual accounts or configure organization-wide access
+  </Card>
+  <Card title="Deploy Roles" icon="key" href="/setup/organizations/inventory">
+    Deploy CloudFormation templates for inventory and access
+  </Card>
+  <Card title="Service Catalog" icon="book" href="/setup/service-catalog">
+    Enable self-service role deployment for customers
+  </Card>
+</CardGroup>
+
+## Architecture
+
+Quiverstone operates as a centralized management platform:
+
+1. **Inventory Collection** - Quiverstone assumes inventory roles in management accounts to discover member accounts
+2. **Account Access** - Access roles in individual accounts enable resource inventory and management
+3. **User Interface** - Web-based dashboard for managing all accounts and organizations
+4. **Role Assumption** - Quick role switching to access AWS accounts directly
+
+## Security Model
+
+Quiverstone follows AWS security best practices:
+
+- **Least Privilege** - All roles grant minimum required permissions
+- **External IDs** - Required for production deployments
+- **Read-Only by Default** - Inventory roles are read-only
+- **Audit Logging** - All role assumptions logged in CloudTrail
+- **No Permanent Credentials** - Uses temporary STS credentials only
+
+## Support & Resources
+
+- **Documentation** - Complete guides for all features
+- **CloudFormation Templates** - Pre-built deployment templates
+- **GitHub** - Open-source templates at [github.com/sentricloud/quiverstone-roles-catalog](https://github.com/sentricloud/quiverstone-roles-catalog)
+
+## Next Steps
+
+1. [Add your first organization](/setup/organizations/index)
+2. [Deploy inventory roles](/setup/organizations/inventory)
+3. [Configure account access](/setup/accounts/access)
+4. [Manage customers](/setup/customers)

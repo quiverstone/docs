@@ -1,0 +1,287 @@
+---
+title: Access
+description: Deploy IAM roles for account access
+---
+
+# Deploy Account Access Roles
+
+Deploy read-only access roles to AWS accounts so Quiverstone can collect inventory and provide visibility into your cloud resources. Choose between individual account deployment or organization-wide StackSets.
+
+## Deployment Options
+
+### Individual Account
+Deploy a role to a single AWS account. **Best for:** Stand-alone accounts or selective deployment.
+
+### Organization StackSets
+Deploy roles to all accounts in your AWS Organization with a single operation. **Best for:** Managing many accounts efficiently.
+
+### Access Methods
+
+**Direct Access** - Quiverstone production account directly assumes the role (**recommended**)
+
+**Chained Access** - Multi-hop access through an intermediate account you control (for enhanced security)
+
+## Individual Account - Direct Access
+
+Deploy a read-only access role to a single AWS account.
+
+<Steps>
+  <Step title="Launch the CloudFormation Template">
+    <Note>
+    **Important:** Ensure you're logged into the target AWS account in your browser before clicking the launch button.
+    </Note>
+
+    Click to deploy in the target AWS account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-direct-account-access.yaml&stackName=quiverstone-direct-account-access)
+
+    **Deploy To:** Any AWS account (in us-east-1 or your preferred region)
+  </Step>
+
+  <Step title="Configure Parameters">
+    - **Role Name:** Leave default (`QuiverstoneDirectAccountAccess`) or customize
+    - **Quiverstone Account ID:** Leave as `684035162433` (do not modify)
+    - **External ID:** Leave empty for now
+  </Step>
+
+  <Step title="Create Stack">
+    1. Check the IAM capabilities acknowledgment box
+    2. Click **Create stack**
+    3. Wait for completion (1-2 minutes)
+  </Step>
+
+  <Step title="Copy the Role ARN">
+    From the **Outputs** tab, copy the **TargetRoleArn**
+  </Step>
+
+  <Step title="Configure in Quiverstone">
+    In Quiverstone, navigate to **Accounts > Add Account** or **Edit Account**:
+
+    - **Role Type:** Select **DIRECT**
+    - **Target Role ARN:** Paste the ARN
+    - **External ID:** Enter the external ID from Quiverstone
+    - **Session Name:** (optional) `Quiverstone`
+  </Step>
+</Steps>
+
+## Organization-Wide Deployment with StackSets
+
+Deploy access roles to **all accounts** in your AWS Organization with one operation. New accounts automatically receive the role.
+
+### Prerequisites
+
+<AccordionGroup>
+  <Accordion title="Enable Trusted Access for CloudFormation StackSets">
+    1. Sign in to your **management account**
+    2. Navigate to **CloudFormation > StackSets**
+    3. Click **Enable trusted access** if prompted
+    4. Or follow [AWS documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-enable-trusted-access.html)
+  </Accordion>
+
+  <Accordion title="Required IAM Permissions">
+    Your user/role needs:
+    - `cloudformation:*` (StackSet operations)
+    - `organizations:ListAccounts`
+    - `organizations:DescribeOrganization`
+  </Accordion>
+</AccordionGroup>
+
+### Deploy Direct Access StackSet
+
+<Steps>
+  <Step title="Launch the StackSet Template">
+    <Note>
+    **Important:** Ensure you're logged into your **management account** in your browser before clicking the launch button.
+    </Note>
+
+    Click to deploy from your **management account**:
+
+    [![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-direct-account-access.yaml&stackName=stackset-quiverstone-direct-account-access)
+
+    **Deploy From:** Management Account only
+  </Step>
+
+  <Step title="Configure StackSet Parameters">
+    **Template Parameters:**
+    - **Role Name:** Leave default or customize (will be used in all accounts)
+    - **Quiverstone Account ID:** Leave as `684035162433`
+    - **External ID:** Leave empty initially
+
+    **Deployment Targets:**
+    - **Deploy to:** Select **Deploy to organization**
+    - **Automatic deployment:** Enable to automatically deploy to new accounts
+    - **Account removal behavior:** Choose **Delete stacks** (removes role if account leaves)
+  </Step>
+
+  <Step title="Specify Regions">
+    - **Region:** Select `us-east-1` (or your preferred primary region)
+    - Add additional regions if needed (roles are global, so one region is usually sufficient)
+  </Step>
+
+  <Step title="Review and Deploy">
+    1. Review all settings
+    2. Check IAM capabilities acknowledgment
+    3. Click **Submit**
+    4. Monitor deployment progress in the StackSet console
+  </Step>
+
+  <Step title="Verify Deployment">
+    - Navigate to **CloudFormation > StackSets > Stack instances**
+    - Verify instances are **CURRENT** status
+    - Check a few accounts to confirm role exists
+  </Step>
+</Steps>
+
+### Configure Multiple Organizations
+
+To deploy access roles across accounts in multiple organizations:
+
+1. Add each organization to Quiverstone first (with inventory roles)
+2. For each organization's accounts, either:
+   - **Option A:** Deploy a StackSet in each organization's management account
+   - **Option B:** Use individual account deployments for specific accounts
+
+<Note>
+StackSets can only deploy within a single organization. For multi-organization scenarios, deploy separate StackSets in each organization's management account.
+</Note>
+
+## Individual Account - Chained Access
+
+For accounts requiring multi-hop authentication:
+
+<Steps>
+  <Step title="Deploy Intermediate Role (One Time)">
+    Deploy in your trusted/intermediate account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-intermediate.yaml&stackName=quiverstone-chained-account-access-intermediate)
+
+    Save the **IntermediateRoleArn** from Outputs.
+  </Step>
+
+  <Step title="Deploy Destination Role">
+    Deploy in each target account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-destination.yaml&stackName=quiverstone-chained-account-access-destination)
+
+    **Parameters:**
+    - **Intermediate Account ID:** Your intermediate account ID
+    - **Intermediate Role Name:** Match the name from Step 1
+
+    Save the **TargetRoleArn** from Outputs.
+  </Step>
+
+  <Step title="Configure in Quiverstone">
+    In Quiverstone:
+    - **Role Type:** Select **CHAINED**
+    - **Target Role ARN:** Destination role ARN
+    - **Intermediate Role ARN:** Intermediate role ARN
+    - **External IDs and Session Names:** As needed
+  </Step>
+</Steps>
+
+### Chained Access StackSet
+
+To deploy chained destination roles organization-wide:
+
+[![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-chained-account-access-destination.yaml&stackName=stackset-quiverstone-chained-account-access-destination)
+
+Follow the same StackSet deployment steps, but configure the intermediate account parameters.
+
+## What Permissions Are Granted?
+
+All account access roles grant **read-only** permissions via AWS managed policies:
+
+- **ReadOnlyAccess** - AWS managed policy with read permissions across all AWS services
+- **Account Information** - Contact details and region info
+- **Support Access** - Read support cases for account health monitoring
+
+**No write, modify, create, or delete permissions are granted.**
+
+## Updating StackSets
+
+To update all deployed roles (e.g., to add an External ID):
+
+1. Navigate to **CloudFormation > StackSets**
+2. Select your StackSet
+3. Click **Actions > Edit StackSet details**
+4. **Update current template** (no changes needed)
+5. Update **Parameters** (e.g., add External ID)
+6. **Deploy to organization** - Select **Update existing stacks**
+7. Review and submit
+
+Changes propagate to all accounts automatically.
+
+## Removing StackSet Deployments
+
+To remove roles from all accounts:
+
+1. Navigate to **CloudFormation > StackSets**
+2. Select the StackSet
+3. Click **Actions > Delete stacks from StackSet**
+4. Choose **Delete stacks from organization**
+5. Confirm deletion
+
+Once all instances are deleted, you can delete the StackSet itself.
+
+## Troubleshooting
+
+**StackSet deployment fails:**
+- Verify trusted access is enabled for CloudFormation
+- Check you're deploying from the management account
+- Ensure you have required IAM permissions
+
+**Some accounts show OUTDATED status:**
+- Individual stack instances may have drifted
+- Update the StackSet to refresh all instances
+- Check account-specific IAM limits
+
+**Role not appearing in target accounts:**
+- Verify StackSet instance shows CURRENT status
+- Check the specific account in **Stack instances**
+- Allow 5-10 minutes for propagation
+
+**Quiverstone cannot assume roles:**
+- Verify External ID matches in both AWS and Quiverstone
+- Check role ARN is correct
+- For StackSets, ensure role name is consistent across accounts
+- Verify Quiverstone account ID is `684035162433`
+
+## Security Best Practices
+
+- **Use External IDs:** Always configure external IDs for production deployments
+- **Monitor with CloudTrail:** Track all role assumptions
+- **Regular Audits:** Review which accounts have roles deployed
+- **Least Privilege:** Roles grant only read access required for inventory
+- **Automatic Cleanup:** Enable automatic stack deletion when accounts leave organization
+
+## Advanced Configuration
+
+### Selective Deployment with Organizational Units
+
+To deploy only to specific OUs:
+
+1. When creating the StackSet, select **Deploy to organizational units**
+2. Enter the OU IDs you want to target
+3. Enable automatic deployment for new accounts in those OUs
+
+### Service Catalog for Self-Service
+
+For large organizations, deploy the **Account Access Portfolio** via Service Catalog to enable account administrators to self-service deploy access roles.
+
+See [Service Catalog Setup](/setup/service-catalog) for details.
+
+## Next Steps
+
+After deploying access roles:
+
+1. **Add Accounts to Quiverstone:** Configure each account (or let organization inventory auto-discover them)
+2. **Verify Access:** Test role assumption from Quiverstone
+3. **Monitor Inventory:** Ensure Quiverstone can collect resource inventory
+4. **Configure Access Roles:** Add custom access role mappings if needed
+
+## Support
+
+For assistance:
+- Review [troubleshooting](#troubleshooting) above
+- Check [AWS StackSets documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html)
+- Contact Quiverstone support

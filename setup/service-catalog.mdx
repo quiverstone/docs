@@ -1,0 +1,343 @@
+---
+title: Service Catalog
+description: Self-service role deployment with AWS Service Catalog
+---
+
+# Deploy Roles via AWS Service Catalog
+
+AWS Service Catalog enables centralized, self-service deployment of Quiverstone IAM roles. Instead of manually deploying CloudFormation templates, users can select pre-approved products from a catalog.
+
+## When to Use Service Catalog
+
+**For MSPs:** Share the Inventory Roles Portfolio with customer organizations so they can self-service deploy organization inventory roles.
+
+**For Large Organizations:** Deploy the Account Access Portfolio to enable account administrators to self-service deploy access roles without manual CloudFormation deployments.
+
+## Benefits
+
+- **Self-Service:** End users deploy approved templates without AWS expertise
+- **Centralized Control:** Manage approved templates and versions from one location
+- **Automatic Updates:** Push template updates to all users automatically
+- **Governance:** Enforce organizational standards and compliance
+- **Simplified Experience:** Users see curated products instead of complex templates
+
+## Available Portfolios
+
+### Inventory Roles Portfolio (For MSPs)
+
+Deploy organization inventory roles for customer AWS Organizations.
+
+**Use Case:** MSPs managing multiple customer organizations
+
+**Products Included:**
+- Direct Organization Inventory Role
+- Chained Organization Inventory - Destination Role
+- Chained Organization Inventory - Intermediate Role
+
+### Account Access Roles Portfolio
+
+Deploy read-only account access roles organization-wide.
+
+**Use Case:** Organizations deploying access roles to all accounts
+
+**Products Included:**
+- Direct Account Access (individual + StackSet)
+- Chained Account Access (individual + StackSet)
+- Browser Switch Role (individual + StackSet)
+
+## Deploy Inventory Roles Portfolio
+
+For MSPs providing Quiverstone services to customers.
+
+<Steps>
+  <Step title="Launch the Portfolio">
+    <Note>
+    **Important:** Ensure you're logged into your **MSP management account** in your browser before clicking the launch button.
+    </Note>
+
+    Deploy in your MSP management account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/service-catalog/quiverstone-inventory-roles-portfolio.yaml&stackName=quiverstone-inventory-roles-portfolio)
+
+    **Deploy To:** MSP Management Account
+  </Step>
+
+  <Step title="Create the Portfolio">
+    1. Check IAM capabilities acknowledgment
+    2. Click **Create stack**
+    3. Wait for completion (2-3 minutes)
+  </Step>
+
+  <Step title="Share Portfolio with Customers">
+    **Option A: Share with AWS Organizations**
+    1. Navigate to **Service Catalog > Portfolios**
+    2. Select **Quiverstone Inventory Roles Portfolio**
+    3. Click **Share** → **Share with Organization**
+    4. Select the organizational units or accounts
+    5. Click **Share**
+
+    **Option B: Share with Specific Accounts**
+    1. Navigate to **Service Catalog > Portfolios**
+    2. Select **Quiverstone Inventory Roles Portfolio**
+    3. Click **Share** → **Share with AWS Account**
+    4. Enter customer account ID
+    5. Click **Share**
+  </Step>
+
+  <Step title="Customer Deployment">
+    Customers can now:
+    1. Navigate to **Service Catalog > Products** in their account
+    2. Select the appropriate inventory role product
+    3. Click **Launch product**
+    4. Configure parameters (account IDs, external IDs, etc.)
+    5. Deploy the role
+  </Step>
+</Steps>
+
+## Deploy Account Access Portfolio
+
+For organizations deploying access roles across many accounts.
+
+<Steps>
+  <Step title="Launch the Portfolio">
+    <Note>
+    **Important:** Ensure you're logged into your **organization management account** in your browser before clicking the launch button.
+    </Note>
+
+    Deploy in your organization's management account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/service-catalog/quiverstone-account-access-portfolio.yaml&stackName=quiverstone-account-access-portfolio)
+
+    **Deploy To:** Organization Management Account
+  </Step>
+
+  <Step title="Create the Portfolio">
+    1. Check IAM capabilities acknowledgment
+    2. Click **Create stack**
+    3. Wait for completion (2-3 minutes)
+  </Step>
+
+  <Step title="Share Portfolio (Optional)">
+    If you want to share with specific OUs or accounts:
+    1. Navigate to **Service Catalog > Portfolios**
+    2. Select **Quiverstone Account Access Roles Portfolio**
+    3. Click **Share**
+    4. Choose sharing method and target accounts/OUs
+  </Step>
+
+  <Step title="User Deployment">
+    Authorized users can now:
+    1. Navigate to **Service Catalog > Products**
+    2. Select the appropriate access role product
+    3. Click **Launch product**
+    4. Choose between individual or StackSet deployment
+    5. Configure parameters and deploy
+  </Step>
+</Steps>
+
+## Using Service Catalog Products
+
+Once a portfolio is shared, end users can deploy products:
+
+### For Individual Account Roles
+
+1. Sign in to the target AWS account
+2. Navigate to **Service Catalog > Products**
+3. Find "Quiverstone Direct Account Access" (or other product)
+4. Click **Launch product**
+5. Enter a product name (e.g., `quiverstone-access-role`)
+6. Configure parameters:
+   - Leave Quiverstone Account ID as `684035162433`
+   - Enter External ID if provided
+   - Customize role name if needed
+7. Click **Launch**
+8. Wait for provisioning to complete
+9. Copy the Role ARN from **Outputs**
+
+### For Organization-Wide StackSets
+
+1. Sign in to the **management account**
+2. Navigate to **Service Catalog > Products**
+3. Find "Quiverstone Direct Account Access - StackSet"
+4. Click **Launch product**
+5. Configure StackSet parameters:
+   - Deployment target (entire organization or specific OUs)
+   - Enable automatic deployment for new accounts
+   - Select regions
+6. Click **Launch**
+7. Monitor StackSet deployment progress
+
+## Managing Portfolios
+
+### Adding New Product Versions
+
+To add updated templates as new versions:
+
+1. Navigate to **Service Catalog > Products**
+2. Select the product to update
+3. Click **Upload new version**
+4. Provide version info and template location
+5. Click **Upload**
+
+Users can now choose between versions when deploying.
+
+### Updating Portfolio Products
+
+To modify which products are in a portfolio:
+
+1. Navigate to **Service Catalog > Portfolios**
+2. Select the portfolio
+3. Go to **Products** tab
+4. Click **Add product** or **Remove product**
+
+### Managing Access
+
+Control who can access portfolios:
+
+1. Navigate to **Service Catalog > Portfolios**
+2. Select the portfolio
+3. Go to **Groups, roles, and users** tab
+4. Add IAM users, groups, or roles that should have access
+5. Save changes
+
+## Troubleshooting
+
+**Portfolio not visible to shared accounts:**
+- Verify portfolio is successfully shared
+- Check IAM permissions in the target account
+- Ensure user has `servicecatalog:ListAcceptedPortfolioShares` permission
+
+**Product launch fails:**
+- Review launch role permissions (AdministratorAccess is included in templates)
+- Check CloudFormation events for specific errors
+- Verify parameter values are correct
+
+**Template not found:**
+- Confirm S3 bucket is accessible
+- Verify template URL in product definition
+- Check S3 bucket policy allows Service Catalog access
+
+**Cannot share portfolio:**
+- Ensure you're using the management account for organization sharing
+- Check you have `servicecatalog:SharePortfolio` permission
+- Verify AWS Organizations is enabled
+
+## Security Considerations
+
+- **Launch Roles:** Templates include launch roles with AdministratorAccess (required for IAM role creation)
+- **Access Control:** Limit portfolio access to authorized users only
+- **Audit Trail:** All Service Catalog actions are logged in CloudTrail
+- **Tagging:** Use tag update constraints to enforce tagging policies
+
+## Best Practices
+
+**Version Control:**
+- Add new versions as provisioning artifacts, don't modify existing ones
+- Test new versions in non-production environments first
+- Document changes between versions
+
+**User Experience:**
+- Provide clear product descriptions
+- Use descriptive parameter labels
+- Include support information in products
+- Document expected deployment time
+
+**Governance:**
+- Regular portfolio access reviews
+- Monitor provisioned product usage
+- Implement tag update constraints for compliance
+- Use launch constraints appropriately
+
+**Maintenance:**
+- Periodically review and update product versions
+- Remove outdated versions after transition period
+- Keep product descriptions current
+- Monitor for failed product launches
+
+## Advanced Features
+
+### Tag Update Constraints
+
+Enforce tagging standards on deployed resources:
+
+1. Navigate to portfolio → **Constraints**
+2. Click **Create constraint**
+3. Select **Tag update**
+4. Define required tags
+5. Apply to products
+
+### Launch Constraints
+
+Control product deployment settings:
+
+1. Use the included launch roles (already configured in templates)
+2. Or create custom launch constraints for specific needs
+3. Apply constraints at the product level
+
+### Notifications
+
+Get notified of product events:
+
+1. Navigate to portfolio → **Notifications**
+2. Create SNS topic
+3. Subscribe to product events (launch, update, terminate)
+
+## Monitoring Usage
+
+### Track Provisioned Products
+
+View all deployed products:
+
+```bash
+# List all provisioned products
+aws servicecatalog search-provisioned-products
+
+# Describe specific provisioned product
+aws servicecatalog describe-provisioned-product --id <product-id>
+```
+
+### Audit Portfolio Access
+
+Review who has access:
+
+```bash
+# List portfolio principals
+aws servicecatalog list-principals-for-portfolio --portfolio-id <portfolio-id>
+```
+
+## Removing Portfolios
+
+To remove a Service Catalog portfolio:
+
+1. **Terminate all provisioned products first**
+2. Navigate to **Service Catalog > Portfolios**
+3. Select the portfolio
+4. Remove all product associations
+5. Delete the CloudFormation stack that created the portfolio
+
+<Warning>
+Deleting a portfolio does not terminate provisioned products. Terminate products before removing the portfolio.
+</Warning>
+
+## Next Steps
+
+After deploying Service Catalog portfolios:
+
+1. **Train Users:** Provide guidance on using Service Catalog
+2. **Monitor Usage:** Track which products are being deployed
+3. **Update Templates:** Keep products current with latest versions
+4. **Gather Feedback:** Improve product descriptions and parameters based on user experience
+
+## Support
+
+For assistance with Service Catalog:
+- Review [troubleshooting](#troubleshooting) above
+- Check [AWS Service Catalog documentation](https://docs.aws.amazon.com/servicecatalog/)
+- Contact Quiverstone support
+
+## Additional Resources
+
+- [AWS Service Catalog Administrator Guide](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/)
+- [AWS Service Catalog User Guide](https://docs.aws.amazon.com/servicecatalog/latest/userguide/)
+- [Service Catalog Best Practices](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/best-practices.html)
+- [Portfolio Sharing Guide](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/catalogs_portfolios_sharing.html)

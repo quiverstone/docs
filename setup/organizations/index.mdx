@@ -1,0 +1,115 @@
+---
+title: Manage
+description: Setup and manage AWS Organizations
+---
+
+# Manage AWS Organizations
+
+AWS Organizations in Quiverstone represent your AWS Organization accounts and enable automatic discovery and management of all member accounts.
+
+## Adding an Organization
+
+1. Navigate to **Organizations** and click **Add Organization**
+2. Complete the 3-step wizard:
+
+### Step 1: Organization Information
+- **Account ID** (required) - Your AWS Organization's 12-digit account ID
+- **Account Name** (required) - A friendly display name
+- **Customer Name** - Client or customer this organization belongs to
+- **Organization Type** - Management, Delegated Admin, or Member
+- **Engagement Type** - MSP, PS, Consulting, Resale, or Other
+
+### Step 2: Inventory Role Configuration
+Configure how Quiverstone accesses your organization:
+
+**Direct Role (recommended)**
+- **Target Role ARN** - IAM role ARN (e.g., `arn:aws:iam::123456789012:role/QuiverstoneRole`)
+- **External ID** - External ID for secure role assumption
+- **Session Name** (optional) - Identifier for CloudTrail logs
+
+**Chained Role** (for multi-hop access)
+- Requires both intermediate and target role configuration
+
+<Note>
+Leave role fields empty to create a reference-only organization. You can add inventory access later.
+</Note>
+
+### Step 3: Metadata
+Optional: Add additional contact information or custom metadata
+
+## Viewing Organizations
+
+Navigate to **Organizations > List** to see all configured organizations.
+
+The list shows:
+- Organization statistics by type (All, MSP, PS, Consulting, Resale, Other)
+- Search by name, account ID, or customer
+- Organization details including account count and role type
+- Sorting and pagination controls
+
+Click **View** to see organization details, access roles, and associated accounts.
+
+## Editing an Organization
+
+1. Navigate to **Organizations > List**
+2. Click **Edit** next to the organization
+
+You can update:
+- Basic information (ID, name, customer, type)
+- Inventory role configuration (role type, ARNs, external IDs)
+- Organization Access Roles (role mappings for all member accounts)
+
+Changes take effect immediately. Inventory status is automatically recalculated.
+
+## Organization Inventory
+
+Organizations with inventory access configured automatically discover member accounts.
+
+**How it works:**
+1. Configure an IAM role in your AWS Organization
+2. Quiverstone periodically assumes the role
+3. Member accounts are discovered and imported
+4. New accounts are automatically added
+5. Existing accounts are updated
+
+**Inventory Status:**
+- **ACTIVE** - Inventory role configured, accounts being discovered
+- **REFERENCE_ONLY** - No inventory access, manual configuration only
+
+View discovered accounts in the organization's **Associated Accounts** section.
+
+## Organization Access Roles
+
+Define role mappings that apply to all accounts in an organization. Useful for:
+- Standardizing access across many accounts
+- Setting default roles that can be overridden per account
+- Managing large organizations efficiently
+
+Configure in the **Edit Organization** page under **Organization Access Roles**.
+
+## Deleting an Organization
+
+1. Go to **Organizations > List** > **View**
+2. Click **Delete Organization**
+3. Confirm deletion
+
+<Warning>
+This removes the organization and all associated account records. This action cannot be undone.
+</Warning>
+
+## Best Practices
+
+**Security:**
+- Always use External IDs for role assumption
+- Use descriptive session names for audit trails
+- Test role assumption before adding organizations
+
+**Naming:**
+- Use consistent naming conventions
+- Include customer/client names for easy identification
+- Add environment indicators if managing multiple organizations per customer
+
+**Maintenance:**
+- Review organizations regularly to ensure they're still active
+- Keep customer information and descriptions current
+- Monitor inventory status for access issues
