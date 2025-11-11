@@ -4,9 +4,9 @@
   "name": "Quiverstone Documentation",
   "ignore": [".trunk/**/*", "roles/**/*.yaml", "roles/**/*.yml", "roles/**/*.json", "roles/.git*", "roles/.github/**/*"],
   "colors": {
-    "primary": "#F23165",
-    "light": "#F231D5",
-    "dark": "#F23165"
+    "primary": "#30CABE",
+    "light": "#30CABE",
+    "dark": "#363789"
   },
   "favicon": "/favicon.png",
   "primaryTab": {
@@ -116,8 +116,8 @@
     }
   },
   "logo": {
-    "light": "/assets/logo/light.svg",
-    "dark": "/assets/logo/dark.svg"
+    "light": "/assets/logo/light.png",
+    "dark": "/assets/logo/dark.png"
   },
   "navbar": {
     "links": [
