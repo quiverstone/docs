@@ -27,7 +27,7 @@ Quiverstone assumes a role in an intermediate account you control, which then as
 
     Click the button below to deploy the role in your AWS management account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-direct-org-inventory.yaml&stackName=quiverstone-direct-org-inventory)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-direct-org-inventory.yaml&stackName=quiverstone-direct-org-inventory)
 
     **Deploy To:** Management Account or Delegated Admin Account (in us-east-1)
   </Step>
@@ -90,7 +90,7 @@ Chained access creates a two-step role assumption path:
 
     Click to deploy the intermediate role in your trusted account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-chained-org-inventory-intermediate.yaml&stackName=quiverstone-chained-org-inventory-intermediate)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-chained-org-inventory-intermediate.yaml&stackName=quiverstone-chained-org-inventory-intermediate)
 
     **Parameters:**
     - **Role Name:** Leave default or customize
@@ -110,7 +110,7 @@ Chained access creates a two-step role assumption path:
 
     Click to deploy the destination role in your management account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-chained-org-inventory-destination.yaml&stackName=quiverstone-chained-org-inventory-destination)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/inventory/quiverstone-chained-org-inventory-destination.yaml&stackName=quiverstone-chained-org-inventory-destination)
 
     **Parameters:**
     - **Role Name:** Must match the name used in Step 1 (default is fine)

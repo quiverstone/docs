@@ -8,7 +8,7 @@
     "light": "#F231D5",
     "dark": "#F23165"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.png",
   "primaryTab": {
     "name": "Home"
   },
@@ -83,75 +83,33 @@
             "pages": ["integrations"]
           }
         ]
-      },
-      {
-        "tab": "Consulting",
-        "groups": [
-          {
-            "group": "Consulting",
-            "pages": ["consulting"]
-          },
-          {
-            "group": "Accounts",
-            "pages": ["consulting/accounts/new-root-account"]
-          },
-          {
-            "group": "Configuration",
-            "pages": [
-              "consulting/configuration/alternate-contacts",
-              "consulting/configuration/organization-configuration",
-              "consulting/configuration/identity-center-sso"
-            ]
-          },
-          {
-            "group": "Convention",
-            "pages": [
-              "consulting/convention/email-and-accounts",
-              "consulting/convention/resource-naming",
-              "consulting/convention/tagging-strategy"
-            ]
-          },
-          {
-            "group": "Pricing",
-            "pages": ["consulting/pricing/control-tower-costs"]
-          },
-          {
-            "group": "References",
-            "pages": [
-              "consulting/references/api-rest-vs-httpv2",
-              "consulting/references/ec2-other",
-              "consulting/references/regions-partitions",
-              "consulting/references/security-services"
-            ]
-          }
-        ]
       }
     ],
     "global": {
       "anchors": [
         {
           "anchor": "Documentation",
-          "href": "https://docs.sentri.cloud",
+          "href": "https://docs.quiverstone.io",
           "icon": "book-open-cover"
         },
         {
           "anchor": "Community",
-          "href": "https://community.sentri.cloud",
+          "href": "https://community.quiverstone.io",
           "icon": "discord"
         },
         {
           "anchor": "Blog",
-          "href": "https://blog.sentri.cloud",
+          "href": "https://blog.quiverstone.io",
           "icon": "newspaper"
         },
         {
           "anchor": "Newsletter",
-          "href": "https://updates.sentri.cloud",
+          "href": "https://updates.quiverstone.io",
           "icon": "envelope"
         },
         {
           "anchor": "Roadmap",
-          "href": "https://sentricloud.canny.io/",
+          "href": "https://quiverstone.canny.io/",
           "icon": "map"
         }
       ]
@@ -165,24 +123,24 @@
     "links": [
       {
         "label": "Home",
-        "href": "https://www.sentri.cloud"
+        "href": "https://www.quiverstone.io"
       },
       {
         "label": "Support",
-        "href": "mailto:support@sentri.cloud"
+        "href": "mailto:support@quiverstone.io"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.sentri.cloud"
+      "href": "https://app.quiverstone.io"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/SentriCloud",
-      "github": "https://github.com/SentriCloud",
-      "linkedin": "https://linkedin.com/company/SentriCloud"
+      "x": "https://x.com/quiverstoneio",
+      "github": "https://github.com/quiverstone",
+      "linkedin": "https://linkedin.com/company/quiverstone"
     }
   }
 }

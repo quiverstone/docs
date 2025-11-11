@@ -33,7 +33,7 @@ Deploy a read-only access role to a single AWS account.
 
     Click to deploy in the target AWS account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-direct-account-access.yaml&stackName=quiverstone-direct-account-access)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-direct-account-access.yaml&stackName=quiverstone-direct-account-access)
 
     **Deploy To:** Any AWS account (in us-east-1 or your preferred region)
   </Step>
@@ -96,7 +96,7 @@ Deploy access roles to **all accounts** in your AWS Organization with one operat
 
     Click to deploy from your **management account**:
 
-    [![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-direct-account-access.yaml&stackName=stackset-quiverstone-direct-account-access)
+    [![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-direct-account-access.yaml&stackName=stackset-quiverstone-direct-account-access)
 
     **Deploy From:** Management Account only
   </Step>
@@ -153,7 +153,7 @@ For accounts requiring multi-hop authentication:
   <Step title="Deploy Intermediate Role (One Time)">
     Deploy in your trusted/intermediate account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-intermediate.yaml&stackName=quiverstone-chained-account-access-intermediate)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-intermediate.yaml&stackName=quiverstone-chained-account-access-intermediate)
 
     Save the **IntermediateRoleArn** from Outputs.
   </Step>
@@ -161,7 +161,7 @@ For accounts requiring multi-hop authentication:
   <Step title="Deploy Destination Role">
     Deploy in each target account:
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-destination.yaml&stackName=quiverstone-chained-account-access-destination)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/quiverstone-chained-account-access-destination.yaml&stackName=quiverstone-chained-account-access-destination)
 
     **Parameters:**
     - **Intermediate Account ID:** Your intermediate account ID
@@ -183,7 +183,7 @@ For accounts requiring multi-hop authentication:
 
 To deploy chained destination roles organization-wide:
 
-[![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.sentri.cloud.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-chained-account-access-destination.yaml&stackName=stackset-quiverstone-chained-account-access-destination)
+[![Launch StackSet](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://assets.quiverstone.io.s3.us-east-2.amazonaws.com/quiverstone-roles-catalog/access/stackset-quiverstone-chained-account-access-destination.yaml&stackName=stackset-quiverstone-chained-account-access-destination)
 
 Follow the same StackSet deployment steps, but configure the intermediate account parameters.
 
