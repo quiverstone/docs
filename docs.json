@@ -44,14 +44,10 @@
               },{
                 "group": "Access Management",
                 "pages": [
+                  "setup/users",
                   "setup/roles",
                   "setup/groups",
-                  "setup/Teams"
-                ]
-              },{
-                "group": "Deployment",
-                "pages": [
-                  "setup/service-catalog"
+                  "setup/teams"
                 ]
               }
             ]
@@ -88,9 +84,9 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://docs.quiverstone.io",
-          "icon": "book-open-cover"
+          "anchor": "Code",
+          "href": "https://github.com/quiverstone",
+          "icon": "code"
         },
         {
           "anchor": "Community",
@@ -99,17 +95,17 @@
         },
         {
           "anchor": "Blog",
-          "href": "https://blog.quiverstone.io",
+          "href": "https://www.quiverstone.io/blog",
           "icon": "newspaper"
         },
         {
           "anchor": "Newsletter",
-          "href": "https://updates.quiverstone.io",
+          "href": "https://www.quiverstone.io/newsletter",
           "icon": "envelope"
         },
         {
-          "anchor": "Roadmap",
-          "href": "https://quiverstone.canny.io/",
+          "anchor": "Changelog",
+          "href": "https://quiverstone.canny.io/changelog",
           "icon": "map"
         }
       ]
