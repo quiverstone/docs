@@ -1,0 +1,167 @@
+---
+title: Configure
+description: Setup and manage AWS Accounts
+---
+
+# Configure AWS Accounts
+
+Quiverstone supports two types of accounts:
+- **Stand-Alone Accounts** - Manually added individual accounts
+- **Inventoried Accounts** - Automatically discovered from AWS Organizations
+
+## Adding a Stand-Alone Account
+
+1. Navigate to **Accounts** and click **Add Account**
+2. Complete the 3-step wizard:
+
+### Step 1: Account Information
+- **Account ID** (required) - AWS account ID (12-digit number)
+- **Account Name** (required) - Friendly display name
+- **Organization** (optional) - Associate with an organization
+- **Description** - Additional account details
+- **Email** - Contact email for this account
+- **Status** - Account status (ACTIVE, SUSPENDED, etc.)
+
+### Step 2: Inventory Role Configuration
+Configure how Quiverstone accesses the account:
+
+**Direct Role (recommended)**
+- **Target Role ARN** - IAM role ARN (e.g., `arn:aws:iam::123456789012:role/QuiverstoneRole`)
+- **External ID** - External ID for secure role assumption
+- **Session Name** (optional) - Identifier for CloudTrail logs
+
+**Chained Role** (for multi-hop access)
+- Requires both intermediate and target role configuration
+
+<Note>
+Leave role fields empty to create a reference-only account. Inventory access can be added later.
+</Note>
+
+### Step 3: Metadata
+Optional: Add custom metadata and attributes
+
+## Viewing Accounts
+
+Navigate to **Accounts > List** to see all configured accounts.
+
+The list shows:
+- Account statistics (All, Suspended, Individual, Customized)
+- Search by account name, ID, or organization
+- Account type indicators:
+  - **List** - Reference only, no access
+  - **Read** - Inventory role configured, read-only access
+  - **Access** - Custom access roles configured
+  - **Inventory** - Discovered from organization
+  - **Customized** - Inventoried account with custom modifications
+
+Click **View** to see account details. Click **Edit** to modify configuration.
+
+## Editing Accounts
+
+1. Navigate to **Accounts > List**
+2. Click **Edit** next to the account
+
+### Stand-Alone Accounts (Full Edit)
+You can modify:
+- All account information
+- Inventory role configuration
+- Account access roles
+
+### Inventoried Accounts (Limited Edit)
+- **Read-Only**: Basic information (sourced from AWS)
+- **Editable**: Inventory role configuration
+- **Editable**: Account access roles (for customization)
+
+The interface clearly indicates if an account is from organization inventory.
+
+## Understanding Account Types
+
+### Stand-Alone Accounts
+
+Manually added accounts with full edit and delete capabilities.
+
+**List Account:**
+- Reference only, basic metadata tracked
+- No inventory or access configured
+- Use for documentation purposes
+
+**Read Account:**
+- Inventory role configured
+- Read-only access to collect resource information
+- Cannot execute actions in the account
+
+**Access Account:**
+- Custom access roles configured
+- Full management capabilities based on role permissions
+- Use for automation and management tasks
+
+### Inventoried Accounts
+
+Automatically discovered from AWS Organizations.
+
+**Characteristics:**
+- Auto-discovered and updated
+- Basic information is read-only
+- Can add custom access roles
+- Cannot be deleted directly
+
+**Customization:**
+Even though basic info is read-only, you can:
+- Add account-specific access roles
+- Configure inventory role for direct access
+- Override organization-level settings
+
+## Account Access Roles
+
+Configure account-specific role mappings that override organization-level roles.
+
+**When to use:**
+- Account needs different access than organization defaults
+- Stand-alone accounts requiring specific automation roles
+- Customizing access for particular accounts in an organization
+
+Configure in the **Edit Account** page under **Account Access Roles**.
+
+## Deleting Accounts
+
+1. Navigate to **Accounts > List** > **View**
+2. Click **Delete Account** (only available for stand-alone accounts)
+3. Confirm deletion
+
+<Warning>
+Only stand-alone accounts can be deleted. Inventoried accounts are managed through their parent organization. This action cannot be undone.
+</Warning>
+
+## Role Assumption
+
+Quickly assume configured roles directly from the accounts list:
+
+1. Click the **Assume Role** icon (swap icon) next to any account
+2. Select the role you want to assume
+3. Quiverstone opens the AWS console with the assumed role
+
+This provides quick access to your AWS accounts without leaving Quiverstone.
+
+## Best Practices
+
+**Organization vs Stand-Alone:**
+- Use organizations for AWS Organization accounts (automatic discovery)
+- Use stand-alone accounts for:
+  - Individual AWS accounts not in an organization
+  - Development/test accounts
+  - Accounts requiring special handling
+
+**Security:**
+- Always use External IDs for role assumption
+- Use descriptive session names for audit trails
+- Test role assumption before relying on access
+
+**Customization:**
+- Use organization-level roles for consistency
+- Override at account level only when needed
+- Document customizations for future reference
+
+**Regular Maintenance:**
+- Review suspended accounts periodically
+- Remove or update inactive stand-alone accounts
+- Keep contact information current

@@ -1,0 +1,273 @@
+---
+title: Template Library
+description: CloudFormation template library and resource catalog
+---
+
+# CloudFormation Template Library
+
+<Note>
+**Status:** In Development - The Template Library feature is currently under development and will be available in a future release.
+</Note>
+
+## Overview
+
+The Template Library provides a centralized catalog of CloudFormation templates for common AWS resources and architectures. Access curated templates from public repositories, AWS samples, and custom team libraries all from within Quiverstone.
+
+## Planned Features
+
+### Public Template Collections
+
+**AWS Sample Templates**
+- Official AWS CloudFormation sample templates
+- Best practice architectures
+- Common infrastructure patterns
+- Direct links to AWS samples repository
+
+**AWS Control Tower Customizations**
+- Control Tower customization templates
+- Account Factory customizations
+- Guardrail configurations
+- Links to AWS Control Tower solutions
+
+**Community Templates**
+- Popular open-source CloudFormation templates
+- Community-contributed solutions
+- Verified and tested templates
+
+### Custom Template Libraries
+
+**Team Repositories**
+- Link to internal Git repositories
+- Private template collections
+- Team-specific infrastructure patterns
+- Organization-standard templates
+
+**Template Management**
+- Browse templates by category
+- Search templates by resource type
+- Preview template contents
+- Quick deploy to selected accounts
+
+### Template Categories
+
+Templates will be organized by use case:
+
+**Networking**
+- VPC architectures
+- Transit Gateway configurations
+- Network security groups
+- VPN and Direct Connect setups
+
+**Security**
+- IAM policies and roles
+- Security Hub configurations
+- GuardDuty setups
+- Config rules
+
+**Compute**
+- EC2 instance patterns
+- Auto Scaling groups
+- ECS/EKS clusters
+- Lambda functions
+
+**Storage**
+- S3 bucket configurations
+- EBS volume setups
+- EFS file systems
+- Backup configurations
+
+**Database**
+- RDS instances and clusters
+- DynamoDB tables
+- Aurora configurations
+- Database migration patterns
+
+**Monitoring & Observability**
+- CloudWatch dashboards
+- Alarms and metrics
+- SNS notification setups
+- EventBridge rules
+
+**CI/CD**
+- CodePipeline configurations
+- CodeBuild projects
+- CodeDeploy applications
+- GitHub Actions integrations
+
+**Compliance & Governance**
+- Config conformance packs
+- Security baselines
+- Compliance frameworks (CIS, PCI, HIPAA)
+- Audit logging setups
+
+## Curated Public Libraries
+
+### AWS CloudFormation Samples
+
+Direct access to official AWS sample templates:
+- **Repository:** [github.com/aws-samples/aws-cloudformation-templates](https://github.com/aws-samples/aws-cloudformation-templates)
+- **Categories:** Comprehensive collection of AWS service templates
+- **Maintenance:** Officially maintained by AWS
+
+### AWS Control Tower Customizations
+
+Control Tower customization resources:
+- **Repository:** [github.com/aws-samples/aws-control-tower-customizations](https://github.com/aws-samples/aws-control-tower-customizations)
+- **Purpose:** Account Factory customizations and guardrails
+- **Use Cases:** Enterprise landing zone configurations
+
+### AWS Security Reference Architecture
+
+Security best practice templates:
+- **Repository:** [github.com/aws-samples/aws-security-reference-architecture-examples](https://github.com/aws-samples/aws-security-reference-architecture-examples)
+- **Focus:** Security controls and compliance
+- **Frameworks:** CIS, NIST, PCI-DSS baselines
+
+### AWS Well-Architected Labs
+
+Hands-on templates from AWS Well-Architected framework:
+- **Repository:** [github.com/aws-samples/aws-well-architected-labs](https://github.com/aws-samples/aws-well-architected-labs)
+- **Focus:** Best practices across all pillars
+- **Content:** Security, reliability, performance, cost optimization
+
+### AWS Solutions Library
+
+Pre-built AWS solutions:
+- **Repository:** [github.com/aws-solutions](https://github.com/aws-solutions)
+- **Solutions:** Production-ready deployments
+- **Categories:** Various industry and use case solutions
+
+## Custom Repository Integration
+
+### Link Team Repositories
+
+Connect your organization's Git repositories:
+
+**Supported Platforms:**
+- GitHub (public and private)
+- GitLab
+- Bitbucket
+- AWS CodeCommit
+
+**Configuration:**
+- Repository URL
+- Access credentials (tokens, SSH keys)
+- Branch selection
+- Template directory paths
+- Auto-sync settings
+
+### Template Discovery
+
+Automatically discover templates in connected repositories:
+- Scan for `.yaml` and `.json` CloudFormation files
+- Parse template metadata
+- Extract parameters and descriptions
+- Categorize by resource types
+
+### Version Control
+
+Track template versions from Git:
+- Display commit history
+- Show template changes over time
+- Pin to specific versions or branches
+- Rollback to previous versions
+
+## Template Deployment
+
+### Quick Deploy
+
+Deploy templates directly to accounts:
+1. Browse template library
+2. Select template
+3. Choose target account(s)
+4. Configure parameters
+5. Deploy as CloudFormation stack
+
+### Batch Deployment
+
+Deploy templates to multiple accounts:
+- Select template once
+- Choose multiple target accounts
+- Configure parameters per account or use defaults
+- Monitor deployment progress across accounts
+
+### StackSet Integration
+
+Convert templates to StackSets:
+- Deploy organization-wide
+- Automatic inclusion of new accounts
+- Centralized parameter management
+- Update all instances simultaneously
+
+## Use Cases
+
+**For MSPs:**
+- Maintain standard infrastructure templates
+- Deploy consistent configurations across customers
+- Quick setup of new customer accounts
+- Version-controlled infrastructure patterns
+
+**For Enterprises:**
+- Centralize approved CloudFormation templates
+- Enforce infrastructure standards
+- Accelerate project setup
+- Maintain compliance baselines
+
+**For Platform Teams:**
+- Share infrastructure patterns across teams
+- Document infrastructure as code
+- Enable self-service infrastructure deployment
+- Maintain golden templates
+
+**For DevOps Teams:**
+- Quick access to common infrastructure patterns
+- Test templates across multiple accounts
+- Standardize deployment processes
+- Reduce infrastructure drift
+
+## Security & Compliance
+
+**Template Validation:**
+- Syntax validation before deployment
+- IAM permission analysis
+- Security best practice checks
+- Cost estimation
+
+**Access Control:**
+- Role-based access to template libraries
+- Approval workflows for deployments
+- Audit logging of template usage
+- Deployment authorization requirements
+
+## Future Enhancements
+
+### Template Builder
+- Visual template designer
+- Drag-and-drop resource configuration
+- Parameter validation
+- Real-time preview
+
+### Template Marketplace
+- Share templates across organizations
+- Rate and review templates
+- Download usage statistics
+- Community contributions
+
+### AI-Assisted Templates
+- Template recommendations based on requirements
+- Auto-generate templates from descriptions
+- Suggest optimizations
+- Security posture improvements
+
+## Related Documentation
+
+For role deployment templates, see:
+- [Organization Inventory Roles](/setup/organizations/inventory) - Deploy organization access roles
+- [Account Access Roles](/setup/accounts/access) - Deploy account access roles
+- [Service Catalog](/setup/service-catalog) - Self-service role deployment
+
+## Coming Soon
+
+This feature is being actively developed. The Template Library will provide centralized access to CloudFormation templates from public repositories and custom team libraries, streamlining infrastructure deployment across your AWS accounts.
+
+Documentation will be updated as the feature becomes available.

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "update-submodules": "git submodule update --remote --merge"
+  },
+  "dependencies": {
+    "mint": "^4.2.158",
+    "mintlify": "^4.0.368"
+  }
+}

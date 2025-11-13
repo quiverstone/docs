@@ -1,0 +1,142 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Quiverstone Documentation",
+  "ignore": [".trunk/**/*", "roles/**/*.yaml", "roles/**/*.yml", "roles/**/*.json", "roles/.git*", "roles/.github/**/*"],
+  "colors": {
+    "primary": "#30CABE",
+    "light": "#30CABE",
+    "dark": "#363789"
+  },
+  "favicon": "/favicon.png",
+  "primaryTab": {
+    "name": "Home"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Home",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["quiverstone"]
+          },
+          {
+            "group": "Setup",
+            "pages": [
+              {
+                "group": "Organizations",
+                "pages": [
+                  "setup/organizations/index",
+                  "setup/organizations/inventory"
+                ]
+              },{
+                "group": "Accounts",
+                "pages": [
+                  "setup/accounts/index",
+                  "setup/accounts/access"
+                ]
+              },{
+                "group": "Customers",
+                "pages": [
+                  "setup/customers"
+                ]
+              },{
+                "group": "Access Management",
+                "pages": [
+                  "setup/users",
+                  "setup/roles",
+                  "setup/groups",
+                  "setup/teams"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Tools & Utilities",
+            "pages": [
+              "tools/index",
+              "tools/dashboards",
+              "tools/template-library"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Documentation",
+            "pages": ["api"]
+          }
+        ]
+      },
+      {
+        "tab": "Integrations",
+        "groups": [
+          {
+            "group": "Integrations",
+            "pages": ["integrations"]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Code",
+          "href": "https://github.com/quiverstone",
+          "icon": "code"
+        },
+        {
+          "anchor": "Community",
+          "href": "https://community.quiverstone.io",
+          "icon": "discord"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://www.quiverstone.io/blog",
+          "icon": "newspaper"
+        },
+        {
+          "anchor": "Newsletter",
+          "href": "https://www.quiverstone.io/newsletter",
+          "icon": "envelope"
+        },
+        {
+          "anchor": "Changelog",
+          "href": "https://quiverstone.canny.io/changelog",
+          "icon": "map"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/assets/logo/light.png",
+    "dark": "/assets/logo/dark.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Home",
+        "href": "https://www.quiverstone.io"
+      },
+      {
+        "label": "Support",
+        "href": "mailto:support@quiverstone.io"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://app.quiverstone.io"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/quiverstoneio",
+      "github": "https://github.com/quiverstone",
+      "linkedin": "https://linkedin.com/company/quiverstone"
+    }
+  }
+}
