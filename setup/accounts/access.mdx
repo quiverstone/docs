@@ -13,6 +13,47 @@ Access roles provide varying levels of permissions to AWS accounts, from read-on
 - Deploy roles across multiple accounts using StackSets
 - Provide day-to-day operational access to member accounts
 
+## Browser Session Deployment
+
+Browser Session is a deployment method where Quiverstone generated the AWS Console Switch Role link for your accounts..
+
+<Steps>
+  <Step title="Launch CloudFormation Template">
+    Click the button below to launch the direct access role template in your AWS account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml&stackName=quiverstone-browser-access-role)
+  </Step>
+
+  <Step title="Configure Essential Parameters">
+    **Role Name** (`pRoleName`): Name for the access role (Default: QuiverstoneBrowserAccess)
+
+    **External ID**: Cannot be used with a browser switch role session
+
+    **Permissions**: Enable the access levels you need (default is Read-Only)
+    - `pIsReadOnlyAccess`: View all resources without making changes
+    - `pIsAdministratorAccess`: Full administrative access
+    - `pIsPowerUserAccess`: Full access except IAM and Organizations
+    - Additional permission levels available in the template
+  </Step>
+
+  <Step title="Create Stack">
+    Review the parameters and create the CloudFormation stack. Wait for the stack to reach CREATE_COMPLETE status.
+  </Step>
+
+
+  <Step title="BONUS: Launch CloudFormation STACKSET">
+    Click the button below to launch the browser access role StackSet template to deploy to all accounts in your organization.
+
+    [![Launch Stack](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role-stackset.yaml&stackName=stackset-quiverstone-browser-access-role)
+  </Step>
+</Steps>
+
+
+<Note>
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+</Note>
+
+
 ## Direct Access Deployment
 
 Direct access is the simplest deployment method where Quiverstone directly assumes roles in your accounts.
@@ -51,7 +92,14 @@ Direct access is the simplest deployment method where Quiverstone directly assum
     - Role ARN from the previous step
     - External ID you configured in the template
   </Step>
+
+  <Step title="BONUS: Launch CloudFormation STACKSET">
+    Click the button below to launch the direct access role StackSet template to deploy to all accounts in your organization.
+
+    [![Launch Stack](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role-stackset.yaml&stackName=stackset-quiverstone-direct-access-role)
+  </Step>
 </Steps>
+
 
 <Note>
 For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
@@ -104,6 +152,12 @@ Chained access requires two deployments: first the intermediate role, then the d
     In Quiverstone, configure chained access using:
     - Intermediate role ARN and External ID (from Step 1)
     - Destination role ARN and External ID (from Step 2)
+  </Step>
+
+  <Step title="BONUS: Launch CloudFormation STACKSET">
+    Click the button below to launch the chained access role StackSet template to deploy to all accounts in your organization.
+
+    [![Launch Stack](/assets/stackset.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/chained-access-role-stackset.yaml&stackName=stackset-quiverstone-chained-access-role)
   </Step>
 </Steps>
 
