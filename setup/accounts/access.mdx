@@ -165,6 +165,37 @@ Chained access requires two deployments: first the intermediate role, then the d
 For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
 </Note>
 
+## Stand-Alone Account Inventory Deployment
+
+Stand-Alone account inventory is a deployment method where Quiverstone can invnetory details about a single account
+
+<Steps>
+  <Step title="Launch CloudFormation Template">
+    Click the button below to launch the direct access role template in your AWS account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/standalone-account-inventory-role.yaml&stackName=quiverstone-standalone-inventory-role)
+  </Step>
+
+  <Step title="Configure Essential Parameters">
+    **Role Name** (`pRoleName`): Name for the access role (Default: QuiverstoneStandaloneAccountInventory)
+
+    **External ID**: Cannot be used with a browser switch role session
+
+    **Permissions**: Enable the access levels you need (default is Read-Only)
+    - `pIsReadOnlyAccess`: View all resources without making changes
+  </Step>
+
+  <Step title="Create Stack">
+    Review the parameters and create the CloudFormation stack. Wait for the stack to reach CREATE_COMPLETE status.
+  </Step>
+
+</Steps>
+
+
+<Note>
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+</Note>
+
 ## Next Steps
 
 - **Configure additional accounts**: Repeat the deployment process for other accounts
