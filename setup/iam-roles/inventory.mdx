@@ -1,0 +1,859 @@
+---
+title: "Inventory Roles Reference"
+description: "Comprehensive guide to Quiverstone inventory role templates, account types, and deployment options"
+---
+
+Inventory roles provide read-only access to AWS Organizations and standalone accounts, enabling Quiverstone to discover and catalog your AWS accounts, organizational structure, and resources. This reference provides comprehensive details about all inventory role templates, account types, access methods, and troubleshooting guidance.
+
+## Overview
+
+Quiverstone inventory roles use AWS IAM roles with trust policies that allow Quiverstone to assume them for account discovery and inventory purposes. These roles grant read-only permissions to AWS Organizations APIs (for organization accounts) or account-level information (for standalone accounts). The role catalog provides three CloudFormation templates covering organization and standalone account scenarios.
+
+### Inventory Role Types
+
+**Organization Inventory Roles**: Enable discovery of all accounts within an AWS Organization by providing read-only access to AWS Organizations APIs. Deploy to management accounts or delegated administrator accounts.
+
+**Standalone Account Inventory Roles**: Enable discovery of individual AWS accounts that are not part of an AWS Organization. Deploy to each standalone account separately.
+
+### Key Features
+
+- **Read-Only Access**: All inventory roles provide read-only permissions only
+- **Organization Discovery**: List and describe all accounts in your AWS Organization
+- **Multiple Access Methods**: Direct access or chained access through intermediate account
+- **External ID Support**: Enhanced security through External ID authentication
+- **Flexible Deployment**: Support for management accounts, delegated administrators, and standalone accounts
+
+## Inventory Role Templates
+
+### Direct Organization Inventory Role
+
+**Template**: `direct-org-inventory-role.yaml`
+
+**Purpose**: Provides direct read-only access to AWS Organizations for account discovery and inventory.
+
+**Deploy To**: Management Account or Delegated Administrator Account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/direct-org-inventory-role.yaml&stackName=quiverstone-direct-org-inventory-role)
+
+**Parameters**:
+
+- **pRoleName** (String, Default: `QuiverstoneDirectOrgInventory`)
+  - Name for the direct organization inventory role
+  - Must be unique within the account
+
+- **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
+  - Quiverstone production account ID
+  - **DO NOT MODIFY** this value
+
+- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+  - Security token for role assumption
+  - Strongly recommended for production environments
+  - Generate a unique random string (minimum 32 characters)
+  - Store securely - required when configuring Quiverstone
+
+**Outputs**:
+
+- **oRoleArn**: ARN of the created direct organization inventory role
+- **oRoleExternalId**: External ID for role assumption (if configured)
+- **oRoleName**: Name of the created role
+
+**Permissions Granted**:
+
+- `organizations:List*`: List all organization resources
+- `organizations:Describe*`: Describe organization structure and accounts
+
+**Security Considerations**:
+
+- Supports External ID for enhanced security (strongly recommended)
+- Trusts only the Quiverstone production account
+- Read-only permissions minimize security risk
+- Recommended for most organization inventory deployments
+
+---
+
+### Chained Organization Inventory Role
+
+**Template**: `chained-org-inventory-role.yaml`
+
+**Purpose**: Provides read-only access to AWS Organizations through role chaining via an intermediate account you control.
+
+**Deploy To**: Management Account or Delegated Administrator Account home region (e.g., us-east-1)
+
+**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate-reference))
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/chained-org-inventory-role.yaml&stackName=quiverstone-chained-org-inventory-role)
+
+**Parameters**:
+
+- **pInventoryRoleName** (String, Default: `QuiverstoneChainedOrgInventory`)
+  - Name for the destination organization inventory role
+  - Must be unique within the account
+
+- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+  - External ID for role assumption
+  - Can be different from intermediate role External ID
+  - Recommended for enhanced security
+
+- **pIntermediateAccountId** (String, Required)
+  - AWS Account ID that serves as the intermediate hop for role chaining
+  - Must be a 12-digit account number
+  - This is an account you own and have access to
+
+- **pTrustPrincipals** (String, Default: `All`)
+  - Controls which principals in intermediate account can assume this role
+  - Options:
+    - `All`: Trust all principals in the intermediate account
+    - `Named`: Trust only the specific role named in pIntermediateRoleName
+  - Recommended: Use `Named` for enhanced security
+
+- **pIntermediateRoleName** (String, Default: `QuiverstoneTrustedIntermediate`)
+  - Name of the role in the intermediate account
+  - Required if pTrustPrincipals is set to `Named`
+  - Populate for reference even if trusting entire account
+
+- **pIntermediateRoleExternalId** (String, Optional, Max: 1224 characters)
+  - External ID for intermediate role assumption
+  - Reference only - used when configuring Quiverstone
+  - Should match the External ID configured on the intermediate role
+
+**Outputs**:
+
+- **oInventoryRoleArn**: ARN of the destination organization inventory role
+- **oInventoryRoleExternalId**: External ID for inventory role assumption (if configured)
+- **oIntermediateRoleArn**: ARN of the intermediate role (if name provided)
+- **oIntermediateRoleArnExcluded**: Notice if intermediate role name not provided
+- **oIntermediateRoleExternalId**: External ID for intermediate role (if configured)
+- **oTrustAllPrincipals**: Notice if trusting all principals in intermediate account
+
+**Permissions Granted**:
+
+- `organizations:List*`: List all organization resources
+- `organizations:Describe*`: Describe organization structure and accounts
+
+**Security Considerations**:
+
+- Requires intermediate role to be deployed first
+- Provides additional security layer through role chaining
+- Use `Named` trust for maximum security
+- Both intermediate and inventory roles can have separate External IDs
+- Best for highly regulated environments
+
+---
+
+### Standalone Account Inventory Role
+
+**Template**: `standalone-account-inventory-role.yaml`
+
+**Purpose**: Provides read-only access to a standalone AWS account (not part of an AWS Organization) for inventory purposes.
+
+**Deploy To**: Standalone Account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/standalone-account-inventory-role.yaml&stackName=quiverstone-standalone-account-inventory-role)
+
+**Parameters**:
+
+- **pRoleName** (String, Default: `QuiverstoneStandaloneAccountInventory`)
+  - Name for the standalone account inventory role
+  - Must be unique within the account
+
+- **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
+  - Quiverstone production account ID
+  - **DO NOT MODIFY** this value
+
+- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+  - Security token for role assumption
+  - Strongly recommended for production environments
+  - Generate a unique random string (minimum 32 characters)
+  - Store securely - required when configuring Quiverstone
+
+**Outputs**:
+
+- **oRoleArn**: ARN of the created standalone account inventory role
+- **oRoleExternalId**: External ID for role assumption (if configured)
+- **oRoleName**: Name of the created role
+
+**Permissions Granted**:
+
+- Read-only access to account metadata and basic resource information
+- No organization-level permissions (account is standalone)
+
+**Security Considerations**:
+
+- Supports External ID for enhanced security (strongly recommended)
+- Trusts only the Quiverstone production account
+- Read-only permissions minimize security risk
+- Must be deployed to each standalone account separately
+
+
+
+## Account Type Comparison
+
+### Management Account Inventory
+
+**How It Works**: Deploy inventory role directly in the AWS Organizations management account with full organization read access.
+
+**When to Use**:
+
+- You have direct access to the management account
+- Security policies allow external role assumption in management account
+- Want simplest deployment with fewest components
+- No delegation requirements
+
+**Advantages**:
+
+- Direct access to all organization data
+- Simplest configuration
+- No additional delegation setup required
+- Complete organization visibility
+- Single role deployment
+
+**Disadvantages**:
+
+- Requires management account access
+- External role in management account (some policies restrict this)
+- All assumptions occur in management account
+- May not meet security requirements for highly regulated environments
+
+**Best For**: Small to medium organizations, straightforward security policies, environments where management account access is permitted
+
+**Deployment Steps**:
+
+1. Log into AWS management account
+2. Deploy `direct-org-inventory-role.yaml` or `chained-org-inventory-role.yaml`
+3. Configure External ID parameter
+4. Note the role ARN and External ID
+5. Configure Quiverstone with role details
+
+---
+
+### Delegated Administrator Account Inventory
+
+**How It Works**: Use AWS Organizations delegation policy to delegate organization read permissions to a designated administrator account, then deploy inventory role in that account.
+
+**When to Use**:
+
+- Security policies restrict external access to management account
+- Want to separate management account responsibilities
+- Implementing least privilege access patterns
+- Have designated administrator accounts for specific functions
+- Following AWS best practices for account isolation
+
+**Advantages**:
+
+- Management account remains isolated from external access
+- Follows AWS best practices for delegation
+- Centralized administration in delegated account
+- Maintains full organization visibility
+- Reduces risk to management account
+
+**Disadvantages**:
+
+- Requires delegation policy setup
+- Additional configuration step
+- Need to manage delegated account permissions
+- More complex initial setup
+
+**Best For**: Large organizations, highly regulated environments, security-conscious deployments, organizations following AWS best practices
+
+**Deployment Steps**:
+
+1. Log into AWS management account
+2. Edit `organization-delegation-policy.json` with delegated account ID
+3. Attach delegation policy to AWS Organizations service
+4. Log into delegated administrator account
+5. Deploy `direct-org-inventory-role.yaml` or `chained-org-inventory-role.yaml`
+6. Configure External ID parameter
+7. Note the role ARN and External ID
+8. Configure Quiverstone with role details
+
+**Delegation Policy**: The `organization-delegation-policy.json` file delegates AWS Organizations read permissions from the management account to a specific delegated administrator account. This allows the delegated account to list and describe organization resources without requiring management account credentials.
+
+---
+
+### Standalone Account Inventory
+
+**How It Works**: Deploy inventory role in an AWS account that is not part of an AWS Organization.
+
+**When to Use**:
+
+- Account is not part of an AWS Organization
+- Single account deployment
+- Testing or proof-of-concept scenarios
+- Small businesses with single AWS account
+- Accounts that cannot or will not join an organization
+
+**Advantages**:
+
+- Simple deployment for non-organization accounts
+- No organization prerequisites
+- Quick setup
+- No delegation or organization configuration required
+
+**Disadvantages**:
+
+- No organization-level visibility
+- Limited to single account inventory
+- Must deploy separately to each standalone account
+- Cannot discover related accounts automatically
+- More operational overhead for multiple accounts
+
+**Best For**: Standalone accounts, single account deployments, testing, small businesses, accounts outside of organizations
+
+**Deployment Steps**:
+
+1. Log into standalone AWS account
+2. Deploy `standalone-account-inventory-role.yaml`
+3. Configure External ID parameter
+4. Note the role ARN and External ID
+5. Configure Quiverstone with role details
+6. Repeat for each additional standalone account
+
+---
+
+### Account Type Decision Matrix
+
+| Criteria | Management Account | Delegated Administrator | Standalone Account |
+|----------|-------------------|------------------------|-------------------|
+| **Organization Required** | Yes | Yes | No |
+| **Management Account Access** | Required | Not Required | N/A |
+| **Setup Complexity** | Simple | Moderate | Simple |
+| **Organization Visibility** | Complete | Complete | None |
+| **Security Isolation** | Low | High | N/A |
+| **Delegation Required** | No | Yes | No |
+| **Best For** | Small/Medium Orgs | Large/Regulated Orgs | Non-Org Accounts |
+| **AWS Best Practice** | Acceptable | Recommended | N/A |
+| **Maintenance** | Low | Low | Medium (per account) |
+
+
+
+## Access Method Comparison
+
+### Direct Inventory Access
+
+**How It Works**: Inventory role trusts Quiverstone production account (684035162433) directly for role assumption. Quiverstone uses STS AssumeRole to directly assume the inventory role.
+
+**When to Use**:
+
+- Security policies allow direct external account trust
+- Want simplest configuration
+- No requirement for additional security layers
+- Standard deployment scenarios
+- Most common deployment method
+
+**Advantages**:
+
+- Simple architecture with direct trust relationship
+- Supports External ID for enhanced security
+- Lower latency than chained access (one hop instead of two)
+- Easier to troubleshoot than chained access
+- Fewer components to manage
+- Recommended for most deployments
+
+**Limitations**:
+
+- Direct trust to Quiverstone production account
+- No intermediate security layer
+- May not meet requirements for highly regulated environments
+- Cannot route through your own security controls
+
+**Security Considerations**:
+
+- External ID strongly recommended to prevent confused deputy attacks
+- Trust policy specifically allows only Quiverstone production account
+- External ID acts as a shared secret between you and Quiverstone
+- Generate unique External IDs for enhanced security
+- Store External IDs securely (password manager, secrets manager)
+- All role assumptions logged in CloudTrail
+- Read-only permissions minimize risk
+
+**When to Choose Direct Access**:
+
+- You need standard inventory access
+- External ID security is sufficient for your requirements
+- You want the simplest production-ready deployment
+- You don't require an intermediate security layer
+- You're deploying in a single AWS organization
+
+---
+
+### Chained Inventory Access
+
+**How It Works**: Role assumptions are routed through an intermediate account you control. Quiverstone first assumes a role in your intermediate account, then uses that role to assume the inventory role in the organization account. This creates a two-hop chain: Quiverstone → Intermediate Account → Organization Account.
+
+**When to Use**:
+
+- Highly regulated environments requiring additional security controls
+- Organizations with strict security policies
+- Multi-organization deployments
+- Scenarios requiring centralized access control
+- Environments where direct trust to external accounts is prohibited
+- Organizations wanting to audit all role assumptions through a central point
+
+**Advantages**:
+
+- Additional security layer through your controlled intermediate account
+- Centralized access control and auditing
+- Can implement custom security controls in intermediate account
+- Supports separate External IDs for each hop
+- Allows you to revoke Quiverstone access by modifying only the intermediate role
+- Meets requirements for environments prohibiting direct external trust
+- Can use specific role trust instead of account-level trust
+
+**Limitations**:
+
+- More complex setup requiring two role deployments
+- Higher latency due to two-hop role assumption
+- More components to manage and troubleshoot
+- Requires maintaining intermediate role in addition to inventory role
+- Slightly higher AWS API call costs (two AssumeRole calls per access)
+
+**Security Considerations**:
+
+- Intermediate role should use External ID for Quiverstone trust
+- Inventory role can use External ID for intermediate account trust
+- Use `Named` trust (specific role) instead of `All` (account-level) for maximum security
+- Intermediate account becomes a critical security component - protect it accordingly
+- Monitor intermediate role usage through CloudTrail
+- Consider implementing additional controls in intermediate account (IP restrictions, time-based access, etc.)
+- Both roles can have separate External IDs for defense in depth
+- Read-only permissions minimize risk
+
+**When to Choose Chained Access**:
+
+- Your security policies require an intermediate security layer
+- You need centralized access control and auditing
+- You're in a highly regulated environment
+- You want to implement custom security controls
+- You're managing multiple AWS organizations
+- Direct trust to external accounts is prohibited by policy
+- You want the ability to quickly revoke access by modifying only one role
+
+---
+
+### Access Method Decision Matrix
+
+| Criteria | Direct Access | Chained Access |
+|----------|---------------|----------------|
+| **Setup Complexity** | Simple | Complex |
+| **External ID Support** | Yes | Yes (both hops) |
+| **Production Ready** | Yes | Yes |
+| **Security Level** | Standard | Enhanced |
+| **Latency** | Low | Medium |
+| **Audit Centralization** | No | Yes |
+| **Intermediate Control** | No | Yes |
+| **Best For** | Most Deployments | Highly Regulated |
+| **Troubleshooting** | Easy | Moderate |
+| **Maintenance** | Low | Medium |
+| **Role Count** | 1 | 2 |
+
+
+
+## Permissions
+
+### AWS Organizations Permissions Granted
+
+Organization inventory roles (both direct and chained) grant read-only access to AWS Organizations APIs. These permissions enable Quiverstone to discover and catalog your AWS organizational structure and accounts.
+
+**Specific Permissions**:
+
+- **organizations:ListAccounts**: List all accounts in the organization
+- **organizations:ListAccountsForParent**: List accounts within organizational units
+- **organizations:ListOrganizationalUnitsForParent**: List organizational units
+- **organizations:ListRoots**: List organization roots
+- **organizations:DescribeAccount**: Get detailed account information
+- **organizations:DescribeOrganization**: Get organization details
+- **organizations:DescribeOrganizationalUnit**: Get OU details
+- **organizations:ListParents**: List parent containers for resources
+- **organizations:ListChildren**: List child resources
+- **organizations:ListTagsForResource**: List tags on organization resources
+
+
+### What These Permissions Enable
+
+**Organization Discovery**:
+
+- Discover all accounts in your AWS Organization
+- Map organizational structure (OUs, accounts, hierarchy)
+- Retrieve account metadata (name, email, status, creation date)
+- Understand organization configuration and settings
+- Track organizational changes over time
+- Identify account relationships and parent-child structures
+
+**Account Inventory**:
+
+- Maintain accurate inventory of all organization accounts
+- Track account lifecycle (active, suspended, closed)
+- Monitor account compliance and governance
+- Support multi-account management and operations
+- Enable account-level reporting and analytics
+
+**Organizational Structure**:
+
+- Visualize organization hierarchy
+- Understand OU structure and account placement
+- Track organizational unit configurations
+- Map accounts to business units or teams
+- Support organizational governance and compliance
+
+
+### What These Permissions Do NOT Allow
+
+**No Write Operations**:
+
+- Cannot modify organization structure
+- Cannot create or delete accounts
+- Cannot change account settings or configurations
+- Cannot modify organizational policies (SCPs, tag policies, etc.)
+- Cannot move accounts between OUs
+- Cannot invite or remove accounts from organization
+
+**No Resource Access**:
+
+- Cannot access resources within accounts
+- Cannot view or modify EC2 instances, S3 buckets, or other resources
+- Cannot access account-level services beyond organization metadata
+- Cannot perform any operations within member accounts
+
+**No Administrative Actions**:
+
+- Cannot modify IAM policies or roles
+- Cannot change billing or payment settings
+- Cannot modify organization-level settings
+- Cannot enable or disable AWS services
+- Cannot manage organization features
+
+**No Data Access**:
+
+- Cannot read application data
+- Cannot access logs or monitoring data
+- Cannot view CloudTrail events (beyond role assumptions)
+- Cannot access sensitive information within accounts
+
+
+### Standalone Account Permissions
+
+Standalone account inventory roles grant read-only access to account-level information:
+
+**Account-Level Permissions**:
+
+- Basic account metadata access
+- No organization-level permissions (account is not in an organization)
+- Read-only access to account configuration
+- Account identification and basic information
+
+**What These Permissions Enable**:
+
+- Identify the standalone account
+- Retrieve basic account information
+- Track account configuration
+- Support single-account inventory
+
+**Limitations**:
+
+- No organization visibility (account is standalone)
+- Limited to single account scope
+- Cannot discover related accounts
+- No organizational structure information
+
+
+
+## Deployment Scenarios
+
+### Scenario 1: Standard Organization with Management Account Access
+
+**Setup**:
+
+- AWS Organization with management account access
+- Security policies allow external role assumption in management account
+- Want simplest deployment
+
+**Recommended Template**: `direct-org-inventory-role.yaml`
+
+**Deployment Steps**:
+
+1. Log into AWS management account
+2. Deploy direct-org-inventory-role.yaml via Quick Launch
+3. Configure External ID parameter (generate secure random string)
+4. Note the role ARN and External ID
+5. Configure Quiverstone with role ARN and External ID
+
+**Benefits**: Simplest setup, direct access, minimal configuration, complete organization visibility
+
+
+---
+
+### Scenario 2: Organization with Delegated Administrator
+
+**Setup**:
+
+- AWS Organization with delegated administrator account
+- Security policies restrict external access to management account
+- Want to follow AWS delegation best practices
+
+**Recommended Template**: `direct-org-inventory-role.yaml` + `organization-delegation-policy.json`
+
+**Deployment Steps**:
+
+1. Log into AWS management account
+2. Edit organization-delegation-policy.json and replace `{DelegatedOrganizationAccountId}` with delegated account ID
+3. Attach delegation policy to AWS Organizations service
+4. Log into delegated administrator account
+5. Deploy direct-org-inventory-role.yaml via Quick Launch
+6. Configure External ID parameter
+7. Note the role ARN and External ID
+8. Configure Quiverstone with role ARN and External ID
+
+**Benefits**: Management account isolation, follows AWS best practices, centralized administration, complete organization visibility
+
+
+---
+
+### Scenario 3: High-Security Organization with Chained Access
+
+**Setup**:
+
+- AWS Organization with strict security requirements
+- Compliance mandates intermediate account controls
+- Want additional security layers and audit capabilities
+
+**Recommended Template**: `chained-org-inventory-role.yaml` + intermediate role
+
+**Deployment Steps**:
+
+1. Deploy trusted intermediate role in intermediate account (see [Intermediate Role Reference](/setup/iam-roles/intermediate-reference))
+2. Log into AWS management account (or delegated administrator account)
+3. Deploy chained-org-inventory-role.yaml via Quick Launch
+4. Configure External ID parameter for inventory role
+5. Configure intermediate account ID and role name
+6. Set pTrustPrincipals to "Named" for enhanced security
+7. Note the role ARN and External ID
+8. Configure Quiverstone with role ARN, External ID, and intermediate role details
+
+**Benefits**: Enhanced security, additional audit layer, compliance-friendly, centralized access control
+
+
+---
+
+### Scenario 4: Standalone Account (Not in Organization)
+
+**Setup**:
+
+- Single AWS account not part of an organization
+- Want Quiverstone inventory for standalone account
+- No organization structure
+
+**Recommended Template**: `standalone-account-inventory-role.yaml`
+
+**Deployment Steps**:
+
+1. Log into standalone AWS account
+2. Deploy standalone-account-inventory-role.yaml via Quick Launch
+3. Configure External ID parameter
+4. Note the role ARN and External ID
+5. Configure Quiverstone with role ARN and External ID
+
+**Benefits**: Simple deployment for non-organization accounts, quick setup, no organization prerequisites
+
+
+---
+
+### Scenario 5: Multiple Standalone Accounts
+
+**Setup**:
+
+- Multiple AWS accounts not part of an organization
+- Want Quiverstone inventory for all accounts
+- No organization structure
+
+**Recommended Template**: `standalone-account-inventory-role.yaml` (deploy to each account)
+
+**Deployment Steps**:
+
+1. For each standalone account:
+   - Log into the account
+   - Deploy standalone-account-inventory-role.yaml via Quick Launch
+   - Use consistent External ID across all accounts (or unique per account)
+   - Note the role ARN
+2. Configure Quiverstone with all role ARNs and External ID(s)
+
+**Benefits**: Inventory across multiple standalone accounts, consistent configuration, flexible External ID management
+
+
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Role Assumption Fails
+
+**Symptom**: Quiverstone cannot assume the inventory role
+
+**Possible Causes**:
+
+- External ID mismatch between role and Quiverstone configuration
+- Incorrect role ARN configured in Quiverstone
+- Trust policy does not include correct principal
+- Role does not exist or was deleted
+
+**Solutions**:
+
+1. Verify External ID matches exactly between CloudFormation template and Quiverstone configuration
+2. Check role ARN is correct and complete
+3. Review role trust policy to ensure it includes Quiverstone production account (684035162433) or intermediate role
+4. Verify role exists in the correct account using AWS Console or CLI
+5. Check CloudTrail logs for AssumeRole attempts and error messages
+
+
+---
+
+#### Permission Denied on Organizations APIs
+
+**Symptom**: Role assumption succeeds but organization API calls fail
+
+**Possible Causes**:
+
+- Role not deployed in management account or delegated administrator account
+- Delegation policy not configured correctly (for delegated admin)
+- Role permissions policy missing or incorrect
+- AWS Organizations not enabled in the account
+
+**Solutions**:
+
+1. Verify role is deployed in management account or delegated administrator account (not a member account)
+2. For delegated admin: Verify organization-delegation-policy.json is attached to AWS Organizations service
+3. Check role permissions policy includes `organizations:List*` and `organizations:Describe*`
+4. Verify AWS Organizations is enabled in the account
+5. Test permissions using AWS CLI: `aws organizations list-accounts --profile <role-profile>`
+
+
+---
+
+#### Delegation Policy Not Working
+
+**Symptom**: Delegated administrator account cannot access organization data
+
+**Possible Causes**:
+
+- Delegation policy not attached to AWS Organizations service
+- Incorrect delegated account ID in policy
+- Policy syntax errors
+- Insufficient permissions in delegated account
+
+**Solutions**:
+
+1. Verify delegation policy is attached to AWS Organizations service in management account
+2. Check delegated account ID in policy matches the actual delegated administrator account
+3. Validate JSON syntax in organization-delegation-policy.json
+4. Ensure delegated account has appropriate permissions to use delegated access
+5. Review AWS Organizations documentation for delegation requirements
+
+
+---
+
+#### Chained Access Not Working
+
+**Symptom**: Chained inventory role assumption fails
+
+**Possible Causes**:
+
+- Intermediate role not deployed or configured incorrectly
+- Intermediate role cannot assume inventory role
+- Trust relationship misconfigured between roles
+- External ID mismatch on either hop
+
+**Solutions**:
+
+1. Verify intermediate role is deployed and accessible
+2. Test intermediate role assumption from Quiverstone
+3. Verify intermediate role has permissions to assume inventory role
+4. Check trust policy on inventory role includes intermediate role or account
+5. Verify External IDs match for both hops
+6. Review intermediate role configuration (see [Intermediate Role Reference](/setup/iam-roles/intermediate-reference))
+7. Check CloudTrail logs for both AssumeRole attempts
+
+
+---
+
+#### Cannot See All Accounts
+
+**Symptom**: Some accounts missing from inventory
+
+**Possible Causes**:
+
+- Role lacks necessary permissions
+- Accounts in different organization
+- Accounts suspended or closed
+- Timing issue with new accounts
+
+**Solutions**:
+
+1. Verify role has `organizations:List*` and `organizations:Describe*` permissions
+2. Check all accounts are in the same organization
+3. Review account status (active, suspended, closed)
+4. Wait a few minutes for new accounts to appear
+5. Test directly using AWS CLI: `aws organizations list-accounts`
+
+
+### Validation Steps
+
+Use these steps to validate your inventory role deployment:
+
+**Step 1: Verify Role Exists**
+
+```bash
+aws iam get-role --role-name QuiverstoneDirectOrgInventory
+```
+
+Expected: Role details returned without errors
+
+**Step 2: Check Trust Policy**
+
+```bash
+aws iam get-role --role-name QuiverstoneDirectOrgInventory --query 'Role.AssumeRolePolicyDocument'
+```
+
+Expected: Trust policy includes Quiverstone production account (684035162433) or intermediate role
+
+**Step 3: Verify Permissions Policy**
+
+```bash
+aws iam list-attached-role-policies --role-name QuiverstoneDirectOrgInventory
+```
+
+Expected: Policy includes organizations:List* and organizations:Describe* permissions
+
+
+**Step 4: Test Role Assumption**
+
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::ACCOUNT_ID:role/QuiverstoneDirectOrgInventory \
+  --role-session-name test \
+  --external-id YOUR_EXTERNAL_ID
+```
+
+Expected: Temporary credentials returned without errors
+
+**Step 5: Test Organizations Access**
+
+```bash
+aws organizations list-accounts \
+  --profile assumed-role-profile
+```
+
+Expected: List of organization accounts returned
+
+**Step 6: Check CloudTrail Logs**
+
+Review CloudTrail logs for AssumeRole events:
+
+- Look for successful AssumeRole events
+- Check for any access denied errors
+- Verify source identity matches expected principal
+

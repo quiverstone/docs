@@ -1,229 +1,122 @@
 ---
 title: Inventory
-description: Deploy IAM roles for organization inventory access
+description: Deploy Quiverstone inventory roles to discover and monitor AWS accounts in your organization
 ---
 
-# Deploy Organization Inventory Roles
+Inventory roles provide read-only access to AWS Organizations, enabling Quiverstone to automatically discover accounts in your organization. Deploy these roles to enable organization-level account discovery and monitoring.
 
-To enable Quiverstone to discover and inventory your AWS Organization's member accounts, deploy an IAM role in your management or delegated administrator account. Choose the deployment method that best fits your security requirements.
+## When to Use Inventory Roles
 
-## Deployment Options
+- Automatically discover all accounts in your AWS Organization
+- Monitor organization structure and account changes
+- Enable organization-wide account management in Quiverstone
+- Provide read-only access to AWS Organizations API
+- Deploy from management account or delegated administrator account
 
-### Direct Access (Recommended)
-Quiverstone production account directly assumes a role in your management account. **Simplest and most common deployment.**
+## Direct Inventory Deployment
 
-### Chained Access
-Quiverstone assumes a role in an intermediate account you control, which then assumes the target role. **Use when security policies require an additional layer.**
-
-## Direct Access Deployment
-
-**Best for:** Most organizations, quickest setup
+Direct inventory access is the most common deployment method where Quiverstone directly assumes the inventory role in your organization's management or delegated administrator account.
 
 <Steps>
-  <Step title="Launch the CloudFormation Template">
-    <Note>
-    **Important:** Ensure you're logged into the correct AWS account in your browser before clicking the launch button.
-    </Note>
+  <Step title="Launch CloudFormation Template">
+    Click the button below to launch the direct organization inventory role template in your management or delegated administrator account:
 
-    Click the button below to deploy the role in your AWS management account:
-
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/quiverstone-direct-org-inventory.yaml&stackName=quiverstone-direct-org-inventory)
-
-    **Deploy To:** Management Account or Delegated Admin Account (in us-east-1)
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/direct-org-inventory-role.yaml&stackName=quiverstone-direct-org-inventory-role)
   </Step>
 
-  <Step title="Configure Parameters">
-    - **Role Name:** Leave default (`QuiverstoneDirectOrgInventory`) or customize
-    - **Quiverstone Account ID:** Leave as `684035162433` (do not modify)
-    - **External ID:** Leave empty for now (you'll get this from Quiverstone)
+  <Step title="Configure Essential Parameters">
+    **Role Name** (`pRoleName`): Name for the inventory role (Default: QuiverstoneDirectOrgInventory)
+
+    **External ID** (`pExternalId`): Security token for role assumption (strongly recommended)
+    - Generate a unique random string (minimum 32 characters)
+    - Store securely - you'll need this when configuring Quiverstone
   </Step>
 
   <Step title="Create Stack">
-    1. Check the IAM capabilities acknowledgment box
-    2. Click **Create stack**
-    3. Wait for deployment to complete (typically 1-2 minutes)
+    Review the parameters and create the CloudFormation stack. Wait for the stack to reach CREATE_COMPLETE status.
   </Step>
 
-  <Step title="Copy the Role ARN">
-    1. Navigate to **Outputs** tab
-    2. Copy the **TargetRoleArn** value
-    3. Save this for Quiverstone configuration
+  <Step title="Copy Role ARN">
+    From the stack Outputs tab, copy the role ARN (e.g., `arn:aws:iam::123456789012:role/QuiverstoneDirectOrgInventory`)
   </Step>
 
-  <Step title="Configure in Quiverstone">
-    1. In Quiverstone, navigate to **Organizations > Add Organization**
-    2. Fill in organization details
-    3. In the **Inventory Role** step:
-       - **Role Type:** Select **DIRECT**
-       - **Target Role ARN:** Paste the ARN from step 4
-       - **External ID:** Enter the external ID provided by Quiverstone
-       - **Session Name:** (optional) Enter `Quiverstone` for CloudTrail tracking
+  <Step title="Configure Quiverstone">
+    In Quiverstone, add the organization using:
+    - Role ARN from the previous step
+    - External ID you configured in the template
   </Step>
 </Steps>
 
 <Note>
-If you configured an External ID, you'll need to update the CloudFormation stack with the External ID value provided by Quiverstone.
+The inventory role only provides read-only access to AWS Organizations. It cannot make changes to your organization structure or account settings. For detailed deployment information, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
 </Note>
 
-## Chained Access Deployment
+## Chained Inventory Deployment
 
-**Best for:** Organizations requiring an additional security layer or compliance controls
+Chained inventory access adds an intermediate security layer by routing role assumptions through a trusted account you control. Use this when security policies require additional controls beyond direct access to your management account.
 
-Chained access creates a two-step role assumption path:
-1. Quiverstone → Your intermediate account → Management account
-
-### When to Use Chained Access
-- Security policies prohibit direct external account trust
-- Compliance requirements mandate intermediate controls
-- You want centralized audit of all access through a trusted account
-- You have existing intermediate role infrastructure
-
-### Prerequisites
-- An AWS account to serve as the intermediate/trusted account
-- IAM permissions to deploy CloudFormation in both accounts
+<Warning>
+Chained inventory requires two deployments: first the intermediate role, then the destination inventory role. Deploy in this order.
+</Warning>
 
 <Steps>
-  <Step title="Deploy Intermediate Role">
+  <Step title="Deploy Intermediate Role (First)">
+    Deploy the intermediate role to your trusted/intermediate account:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/intermediate/trusted-intermediate-role.yaml&stackName=quiverstone-trusted-intermediate-role)
+
+    **Essential Parameters:**
+    - **Role Name** (`pIntermediateRoleName`): Default is QuiverstoneTrustedIntermediate
+    - **External ID** (`pExternalId`): Generate unique random string (minimum 32 characters)
+    - **Assume Role Scope** (`pAssumeRoleScope`): Use `specific-role-any-account` (recommended)
+    - **Destination Role Name** (`pDestinationRoleName`): QuiverstoneChainedOrgInventory
+
     <Note>
-    **Important:** Log into your **intermediate/trusted account** in your browser before clicking the launch button.
+    If you already have an intermediate role deployed, you can reuse it. Skip to Step 2.
     </Note>
 
-    Click to deploy the intermediate role in your trusted account:
-
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/quiverstone-chained-org-inventory-intermediate.yaml&stackName=quiverstone-chained-org-inventory-intermediate)
-
-    **Parameters:**
-    - **Role Name:** Leave default or customize
-    - **Destination Account ID:** Enter your management account ID
-    - **Destination Role Name:** Leave default (`QuiverstoneChainedOrgInventoryDestination`)
-    - **Quiverstone Account ID:** Leave as `684035162433`
-    - **External ID:** Leave empty for now
-    - **Assume Role Scope:** Leave as `any-role-any-account` (recommended)
-
-    Copy the **IntermediateRoleArn** from the Outputs tab.
+    Copy the intermediate role ARN and External ID from the stack outputs.
   </Step>
 
-  <Step title="Deploy Destination Role">
-    <Note>
-    **Important:** Log into your **management account** in your browser before clicking the launch button.
-    </Note>
+  <Step title="Deploy Chained Inventory Role (Second)">
+    Deploy the chained inventory role to your management or delegated administrator account:
 
-    Click to deploy the destination role in your management account:
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/chained-org-inventory-role.yaml&stackName=quiverstone-chained-org-inventory-role)
 
-    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/quiverstone-chained-org-inventory-destination.yaml&stackName=quiverstone-chained-org-inventory-destination)
+    **Essential Parameters:**
+    - **Role Name** (`pChainedOrgInventoryRoleName`): Default is QuiverstoneChainedOrgInventory
+    - **External ID** (`pExternalId`): Generate unique random string (can be different from intermediate)
+    - **Intermediate Account ID** (`pIntermediateAccountId`): Account ID where intermediate role is deployed
+    - **Intermediate Role Name** (`pIntermediateRoleName`): Name of intermediate role (default: QuiverstoneTrustedIntermediate)
+    - **Trust Principals** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
 
-    **Parameters:**
-    - **Role Name:** Must match the name used in Step 1 (default is fine)
-    - **Trust Principals:** Select **Named** (trusts specific role)
-    - **Intermediate Account ID:** Enter your intermediate account ID
-    - **Intermediate Role Name:** Must match role name from Step 1
-    - **External ID:** Leave empty for now
-
-    Copy both **TargetRoleArn** and **IntermediateRoleArn** from Outputs.
+    Copy the chained inventory role ARN from the stack outputs.
   </Step>
 
-  <Step title="Configure in Quiverstone">
-    In Quiverstone, navigate to **Organizations > Add Organization**:
-
-    **Organization Info:**
-    - Fill in organization details as usual
-
-    **Inventory Role:**
-    - **Role Type:** Select **CHAINED**
-    - **Target Role ARN:** Paste destination role ARN
-    - **Target External ID:** Enter external ID (if provided by Quiverstone)
-    - **Target Session Name:** (optional) `Quiverstone`
-    - **Intermediate Role ARN:** Paste intermediate role ARN
-    - **Intermediate External ID:** Enter external ID (if using)
-    - **Intermediate Session Name:** (optional) `Quiverstone-Chain`
+  <Step title="Configure Quiverstone">
+    In Quiverstone, configure chained inventory access using:
+    - Intermediate role ARN and External ID (from Step 1)
+    - Destination role ARN and External ID (from Step 2)
   </Step>
 </Steps>
 
 <Note>
-If using an existing intermediate role, deploy only the destination template and set **Trust Principals** to **All** to trust the entire intermediate account.
+For detailed deployment information, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
 </Note>
 
-## What Permissions Are Granted?
+## Standalone Account Inventory
 
-All inventory roles provide **read-only** access to:
+For AWS accounts that are not part of an organization, you can deploy a standalone account inventory role. This provides basic account information without organization-level discovery.
 
-**AWS Organizations:**
-- Organization structure and hierarchy
-- Organizational units and accounts
-- Service Control Policies (SCPs)
-- Delegated administrator details
-- Account creation status
-
-**Account Information:**
-- Account contact details
-- Available AWS regions
-
-No write, modify, or delete permissions are granted.
-
-## Updating External IDs
-
-If you need to add or update an External ID after initial deployment:
-
-1. Navigate to **CloudFormation** in the AWS Console
-2. Select the stack (`quiverstone-direct-org-inventory` or `quiverstone-chained-org-inventory-*`)
-3. Click **Update**
-4. Select **Use current template**
-5. Update the **pExternalId** parameter
-6. Complete the update
-
-Then update the configuration in Quiverstone.
-
-## Troubleshooting
-
-**Stack creation fails with IAM permissions error:**
-- Ensure you have `iam:CreateRole` and `iam:PutRolePolicy` permissions
-- Deploy in the correct account (management or delegated admin)
-
-**Quiverstone cannot assume the role:**
-- Verify the role ARN is correct
-- Check External ID matches in both AWS and Quiverstone
-- For chained access, ensure intermediate role can assume destination role
-- Verify Quiverstone production account ID is `684035162433`
-
-**Organization inventory not appearing:**
-- Allow 5-10 minutes for initial inventory collection
-- Check inventory status shows "ACTIVE" in Quiverstone
-- Verify the role has the required Organizations permissions
-
-## Security Best Practices
-
-- **Use External IDs:** Always configure an external ID for additional security
-- **Use CloudTrail:** Monitor role assumptions via CloudTrail logs
-- **Least Privilege:** Roles grant only read permissions required for inventory
-- **Regular Review:** Periodically review who has access and audit logs
-- **Session Names:** Use descriptive session names for easier CloudTrail analysis
-
-## Advanced Configuration
-
-### Service Catalog Deployment
-
-For MSPs managing multiple customer organizations, consider deploying the **Inventory Roles Portfolio** via AWS Service Catalog. This enables customers to self-service deploy inventory roles.
-
-See [Service Catalog Setup](/setup/service-catalog) for details.
-
-### Multiple Organizations
-
-To manage multiple organizations:
-1. Deploy the inventory role in each organization's management account
-2. Add each organization separately in Quiverstone
-3. Use consistent naming conventions (e.g., `QuiverstoneOrgInventory-CustomerName`)
+For detailed information about standalone account inventory deployment, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
 
 ## Next Steps
 
-After deploying the inventory role and configuring the organization in Quiverstone:
+- **Deploy access roles**: After inventory setup, deploy access roles to individual accounts
+- **Monitor organization**: Quiverstone will automatically discover new accounts added to your organization
+- **Review permissions**: Verify the inventory role has appropriate read-only access
+- **Test discovery**: Confirm Quiverstone can discover all accounts in your organization
 
-1. **Verify Inventory:** Check that member accounts appear in **Organizations > View > Associated Accounts**
-2. **Configure Access Roles:** Set up [account access roles](/setup/accounts/access) for individual account access
-3. **Monitor Status:** Ensure inventory status remains "ACTIVE"
+## Detailed Deployment Information
 
-## Support
-
-For assistance with role deployment:
-- Check [troubleshooting](#troubleshooting) above
-- Contact Quiverstone support
-- Review [AWS CloudFormation documentation](https://docs.aws.amazon.com/cloudformation/)
+For comprehensive information about all inventory role templates, account types, permissions, deployment scenarios, and troubleshooting, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).

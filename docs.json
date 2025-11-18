@@ -37,6 +37,14 @@
                   "setup/accounts/access"
                 ]
               },{
+                "group": "IAM Roles",
+                "pages": [
+                  "setup/iam-roles/index",
+                  "setup/iam-roles/access",
+                  "setup/iam-roles/inventory",
+                  "setup/iam-roles/intermediate"
+                ]
+              },{
                 "group": "Customers",
                 "pages": [
                   "setup/customers"
