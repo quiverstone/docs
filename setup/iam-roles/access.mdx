@@ -1,0 +1,1603 @@
+---
+title: "Access Roles Reference"
+description: "Comprehensive guide to Quiverstone access role templates, deployment methods, and configuration options"
+---
+
+Access roles provide varying levels of permissions to AWS accounts, enabling Quiverstone to access and manage your AWS infrastructure. This reference provides comprehensive details about all access role templates, deployment methods, security considerations, and troubleshooting guidance.
+
+## Overview
+
+Quiverstone access roles use AWS IAM roles with trust policies that allow Quiverstone to assume them. These roles can be configured with different permission levels ranging from read-only to full administrative access. The role catalog provides six CloudFormation templates covering three access methods and two deployment types.
+
+### Access Role Types
+
+**Browser Access Roles**: Enable browser-based console access through role switching from an AWS account you're logged into. These roles do not support External ID authentication.
+
+**Direct Access Roles**: Allow Quiverstone to directly assume roles in your accounts using federated access. These roles support External ID for enhanced security.
+
+**Chained Access Roles**: Route role assumptions through an intermediate account you control, providing an additional security layer. These roles require both an intermediate role and destination role.
+
+### Key Features
+
+- **Flexible Permissions**: Choose from eight AWS managed policies (ReadOnly, Administrator, PowerUser, ViewOnly, SecurityAudit, SystemAdministrator, SupportUser, Billing)
+- **Multiple Deployment Methods**: Deploy to individual accounts or across organizations using StackSets
+- **Security Controls**: Support for External ID, specific principal trust, and role chaining
+- **Organization Inventory**: All access roles include AWS Organizations read permissions for account discovery
+
+## Access Role Templates
+
+
+### Browser Access Role
+
+**Template**: `browser-access-role.yaml`
+
+**Purpose**: Provides browser-based role switching from a trusted AWS account you're currently logged into.
+
+**Deploy To**: Individual account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml&stackName=quiverstone-browser-access-role)
+
+**Parameters**:
+
+- **pRoleName** (String, Default: `QuiverstoneBrowserSession`)
+  - Name for the browser-accessible role
+  - Must be unique within the account
+
+- **pTrustedAccountId** (String, Required)
+  - AWS Account ID you have access to that can assume this role via browser session
+  - Must be a 12-digit account number
+  - **Important**: Do NOT use any Quiverstone account IDs
+
+- **Permission Flags** (yes/no for each):
+  - **pIsReadOnlyAccess** (Default: yes): View resources across all AWS services
+  - **pIsAdministratorAccess** (Default: no): Full access to all AWS services and resources
+  - **pIsPowerUserAccess** (Default: no): Full access except IAM user/group management
+  - **pIsViewOnlyAccess** (Default: no): View resources and basic metadata
+  - **pIsSecurityAudit** (Default: no): View configuration data and logs
+  - **pIsSystemAdministrator** (Default: no): Full access for application operations
+  - **pIsSupportUser** (Default: no): Troubleshoot issues and manage AWS support cases
+  - **pIsBillingAccess** (Default: no): View and manage billing and cost information
+
+**Outputs**:
+
+- **oRoleArn**: ARN of the created browser access role
+- **oRoleName**: Name of the created role
+- **oTrustedAccountId**: Account ID that can assume this role
+
+**Security Considerations**:
+
+- Does NOT support External ID authentication
+- Trusts all principals in the specified trusted account
+- Best for scenarios where you control both accounts
+- Consider using direct or chained access for production environments requiring External ID
+
+---
+
+### Direct Access Role
+
+**Template**: `direct-access-role.yaml`
+
+**Purpose**: Provides direct federated access from Quiverstone to your AWS accounts.
+
+**Deploy To**: Individual account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role.yaml&stackName=quiverstone-direct-access-role)
+
+**Parameters**:
+
+- **pRoleName** (String, Default: `QuiverstoneDirectAccess`)
+  - Name for the federated access role
+  - Must be unique within the account
+
+- **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
+  - Quiverstone production account ID
+  - **DO NOT MODIFY** this value
+
+- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+  - Security token for role assumption
+  - Strongly recommended for production environments
+  - Generate a unique random string (minimum 32 characters)
+  - Store securely - required when configuring Quiverstone
+
+- **Permission Flags** (yes/no for each):
+  - Same permission options as browser access role (see above)
+
+**Outputs**:
+
+- **oRoleArn**: ARN of the created direct access role
+- **oRoleExternalId**: External ID for role assumption (if configured)
+- **oRoleName**: Name of the created role
+
+**Security Considerations**:
+
+- Supports External ID for enhanced security (strongly recommended)
+- Trusts only the Quiverstone production account
+- Recommended for most production deployments
+- External ID prevents confused deputy attacks
+
+---
+
+### Chained Access Role
+
+**Template**: `chained-access-role.yaml`
+
+**Purpose**: Provides access through role chaining via an intermediate account you control.
+
+**Deploy To**: Target account home region (e.g., us-east-1)
+
+**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate-reference))
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/chained-access-role.yaml&stackName=quiverstone-chained-access-role)
+
+**Parameters**:
+
+- **pChainedAccessRoleName** (String, Default: `QuiverstoneChainedAccess`, Required)
+  - Name for the destination account access role
+  - Must be unique within the account
+
+- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+  - External ID for role assumption
+  - Can be different from intermediate role External ID
+  - Recommended for enhanced security
+
+- **pIntermediateAccountId** (String, Required)
+  - AWS Account ID that serves as the intermediate hop
+  - Must be a 12-digit account number
+  - This is an account you own and have access to
+
+- **pTrustPrincipals** (String, Default: `All`)
+  - Controls which principals in intermediate account can assume this role
+  - Options:
+    - `All`: Trust all principals in the intermediate account
+    - `Named`: Trust only the specific role named in pIntermediateRoleName
+  - Recommended: Use `Named` for enhanced security
+
+- **pIntermediateRoleName** (String, Default: `QuiverstoneTrustedIntermediate`)
+  - Name of the role in the intermediate account
+  - Required if pTrustPrincipals is set to `Named`
+  - Populate for reference even if trusting entire account
+
+- **pIntermediateRoleExternalId** (String, Optional, Max: 1224 characters)
+  - External ID for intermediate role assumption
+  - Reference only - used when configuring Quiverstone
+  - Should match the External ID configured on the intermediate role
+
+- **Permission Flags** (yes/no for each):
+  - Same permission options as browser access role (see above)
+
+**Outputs**:
+
+- **oTargetRoleArn**: ARN of the destination account access role
+- **oTargetRoleExternalId**: External ID for target role assumption (if configured)
+- **oIntermediateRoleArn**: ARN of the intermediate role (if name provided)
+- **oIntermediateRoleArnExcluded**: Notice if intermediate role name not provided
+- **oIntermediateRoleExternalId**: External ID for intermediate role (if configured)
+- **oTrustAllPrincipals**: Notice if trusting all principals in intermediate account
+
+**Security Considerations**:
+
+- Requires intermediate role to be deployed first
+- Provides additional security layer through role chaining
+- Use `Named` trust for maximum security
+- Both intermediate and destination roles can have separate External IDs
+- Best for highly regulated environments or multi-organization scenarios
+
+---
+
+### Browser Access Role StackSet
+
+**Template**: `browser-access-role-stackset.yaml`
+
+**Purpose**: Deploys browser-accessible roles across all organization accounts using CloudFormation StackSets.
+
+**Deploy To**: Management or Delegated CloudFormation StackSet Account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role-stackset.yaml&stackName=stackset-quiverstone-browser-access-role)
+
+**Additional StackSet Parameters**:
+
+- **pDeploymentOUs** (CommaDelimitedList, Required)
+  - Organization Unit IDs to deploy to (comma-separated)
+  - Use root OU ID to deploy to all accounts
+  - Example: `ou-xxxx-yyyyyyyy,ou-xxxx-zzzzzzzz`
+
+- **pDeploymentRegion** (String, Default: `us-east-1`)
+  - AWS Region to deploy the roles
+  - Allowed values: us-east-1, us-east-2, us-west-1, us-west-2, eu-west-1, eu-central-1, ap-southeast-1, ap-southeast-2, ap-northeast-1
+
+- All parameters from browser-access-role.yaml (see above)
+
+**StackSet Configuration**:
+
+- **Permission Model**: SERVICE_MANAGED (uses AWS Organizations integration)
+- **Auto Deployment**: Enabled (automatically deploys to new accounts)
+- **Retain Stacks on Account Removal**: Disabled (cleans up when accounts leave OUs)
+- **Concurrent Deployment**: 100% (deploys to all accounts simultaneously)
+- **Failure Tolerance**: 100% (continues deployment even if some accounts fail)
+
+**Outputs**:
+
+- **oDeploymentOUs**: List of OUs where roles are deployed
+- **oDeploymentRegion**: Region where roles are deployed
+
+---
+
+### Direct Access Role StackSet
+
+**Template**: `direct-access-role-stackset.yaml`
+
+**Purpose**: Deploys direct access roles across all organization accounts using CloudFormation StackSets.
+
+**Deploy To**: Management or Delegated CloudFormation StackSet Account home region (e.g., us-east-1)
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role-stackset.yaml&stackName=stackset-quiverstone-direct-access-role)
+
+**Additional StackSet Parameters**:
+
+- **pDeploymentOUs** (CommaDelimitedList, Required)
+  - Organization Unit IDs to deploy to (comma-separated)
+  - Use root OU ID to deploy to all accounts
+
+- **pDeploymentRegion** (String, Default: `us-east-1`)
+  - AWS Region to deploy the roles
+  - Same allowed values as browser access StackSet
+
+- All parameters from direct-access-role.yaml (see above)
+
+**StackSet Configuration**: Same as browser access StackSet
+
+**Outputs**:
+
+- **oDeploymentOUs**: List of OUs where roles are deployed
+- **oDeploymentRegion**: Region where roles are deployed
+
+---
+
+### Chained Access Role StackSet
+
+**Template**: `chained-access-role-stackset.yaml`
+
+**Purpose**: Deploys chained access roles across all organization accounts using CloudFormation StackSets.
+
+**Deploy To**: Management Account home region (e.g., us-east-1)
+
+**Prerequisites**: Intermediate role must be deployed first
+
+**Launch Template**:
+
+[![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/chained-access-role-stackset.yaml&stackName=stackset-quiverstone-chained-access-role)
+
+**Additional StackSet Parameters**:
+
+- **pDeploymentOUs** (CommaDelimitedList, Required)
+  - Organization Unit IDs to deploy to (comma-separated)
+  - Use root OU ID to deploy to all accounts
+
+- **pDeploymentRegion** (String, Default: `us-east-1`)
+  - AWS Region to deploy the roles
+  - Same allowed values as other StackSets
+
+- All parameters from chained-access-role.yaml (see above)
+
+**StackSet Configuration**: Same as other StackSets
+
+**Outputs**:
+
+- **oDeploymentOUs**: List of OUs where roles are deployed
+- **oDeploymentRegion**: Region where roles are deployed
+
+
+## Access Method Comparison
+
+### Browser-Based Access
+
+**How It Works**: Uses AWS console role switching from an AWS account you're currently logged into. When you're logged into your trusted account, you can switch roles to access other accounts through the browser.
+
+**Use Cases**:
+
+- Interactive console operations requiring browser-based workflows
+- Development and testing environments
+- Scenarios where you're already logged into an AWS account
+- Quick access for troubleshooting and investigation
+- Teams that prefer console-based workflows
+
+**Advantages**:
+
+- Simple setup with minimal configuration
+- Familiar AWS console experience
+- No additional authentication beyond your existing AWS login
+- Easy role switching in the browser
+- Good for ad-hoc access patterns
+
+**Limitations**:
+
+- Does NOT support External ID authentication
+- Requires you to be logged into a trusted AWS account first
+- Less suitable for automated or programmatic access
+- Trusts all principals in the trusted account (broader trust scope)
+- Not recommended for production environments requiring strict security controls
+
+**Security Considerations**:
+
+- Trust policy allows any principal in the trusted account to assume the role
+- No External ID protection against confused deputy attacks
+- Ensure the trusted account has appropriate access controls
+- Consider using direct or chained access for production workloads
+- Best suited for environments where you control both accounts
+
+**When to Choose Browser Access**:
+
+- You need interactive console access
+- You're already logged into an AWS account
+- You're working in development/test environments
+- External ID is not a security requirement
+- You control both the trusted and target accounts
+
+---
+
+### Direct Access
+
+**How It Works**: Quiverstone directly assumes IAM roles in your accounts using federated access with STS AssumeRole. The trust policy allows the Quiverstone production account to assume the role.
+
+**Use Cases**:
+
+- Standard production deployments
+- Automated account access and management
+- Organizations with straightforward security requirements
+- Single AWS organization scenarios
+- Most common deployment method for Quiverstone
+
+**Advantages**:
+
+- Simple architecture with direct trust relationship
+- Supports External ID for enhanced security
+- Suitable for both interactive and programmatic access
+- Lower latency than chained access (one hop instead of two)
+- Easier to troubleshoot than chained access
+- Recommended for most production deployments
+
+**Limitations**:
+
+- Direct trust to Quiverstone production account
+- No intermediate security layer
+- May not meet requirements for highly regulated environments
+- Cannot route through your own security controls
+
+**Security Considerations**:
+
+- External ID strongly recommended to prevent confused deputy attacks
+- Trust policy specifically allows only Quiverstone production account
+- External ID acts as a shared secret between you and Quiverstone
+- Generate unique External IDs for each account or role
+- Store External IDs securely (password manager, secrets manager)
+- Rotate External IDs periodically according to your security policies
+
+**When to Choose Direct Access**:
+
+- You need standard production access
+- External ID security is sufficient for your requirements
+- You want the simplest production-ready deployment
+- You don't require an intermediate security layer
+- You're deploying in a single AWS organization
+
+---
+
+### Chained Access
+
+**How It Works**: Role assumptions are routed through an intermediate account you control. Quiverstone first assumes a role in your intermediate account, then uses that role to assume the destination role in the target account. This creates a two-hop chain: Quiverstone → Intermediate Account → Target Account.
+
+**Use Cases**:
+
+- Highly regulated environments requiring additional security controls
+- Organizations with strict security policies
+- Multi-organization deployments
+- Scenarios requiring centralized access control
+- Environments where direct trust to external accounts is prohibited
+- Organizations wanting to audit all role assumptions through a central point
+
+**Advantages**:
+
+- Additional security layer through your controlled intermediate account
+- Centralized access control and auditing
+- Can implement custom security controls in intermediate account
+- Supports separate External IDs for each hop
+- Allows you to revoke Quiverstone access by modifying only the intermediate role
+- Meets requirements for environments prohibiting direct external trust
+- Can use specific role trust instead of account-level trust
+
+**Limitations**:
+
+- More complex setup requiring two role deployments
+- Higher latency due to two-hop role assumption
+- More components to manage and troubleshoot
+- Requires maintaining intermediate role in addition to destination roles
+- Slightly higher AWS API call costs (two AssumeRole calls per access)
+
+**Security Considerations**:
+
+- Intermediate role should use External ID for Quiverstone trust
+- Destination roles can use External ID for intermediate account trust
+- Use `Named` trust (specific role) instead of `All` (account-level) for maximum security
+- Intermediate account becomes a critical security component - protect it accordingly
+- Monitor intermediate role usage through CloudTrail
+- Consider implementing additional controls in intermediate account (IP restrictions, time-based access, etc.)
+- Both roles can have separate External IDs for defense in depth
+
+**When to Choose Chained Access**:
+
+- Your security policies require an intermediate security layer
+- You need centralized access control and auditing
+- You're in a highly regulated environment
+- You want to implement custom security controls
+- You're managing multiple AWS organizations
+- Direct trust to external accounts is prohibited by policy
+- You want the ability to quickly revoke access by modifying only one role
+
+---
+
+### Access Method Decision Matrix
+
+| Criteria | Browser Access | Direct Access | Chained Access |
+|----------|---------------|---------------|----------------|
+| **Setup Complexity** | Simple | Simple | Complex |
+| **External ID Support** | No | Yes | Yes (both hops) |
+| **Production Ready** | No | Yes | Yes |
+| **Security Level** | Basic | Standard | Enhanced |
+| **Latency** | N/A (browser) | Low | Medium |
+| **Audit Centralization** | No | No | Yes |
+| **Intermediate Control** | No | No | Yes |
+| **Best For** | Dev/Test | Most Production | Highly Regulated |
+| **Troubleshooting** | Easy | Easy | Moderate |
+| **Maintenance** | Low | Low | Medium |
+
+
+## Deployment Type Comparison
+
+### Individual Account Deployment
+
+**How It Works**: Deploy CloudFormation templates directly to individual AWS accounts one at a time. Each deployment creates a stack in a single account.
+
+**Use Cases**:
+
+- Small number of accounts (1-10)
+- Accounts not in an AWS Organization
+- Different configurations needed per account
+- Testing and validation before organization-wide deployment
+- Accounts requiring unique permission sets
+- Standalone accounts or accounts in different organizations
+
+**Deployment Process**:
+
+1. Log into the target AWS account
+2. Launch the CloudFormation template
+3. Configure parameters specific to that account
+4. Create the stack
+5. Copy outputs for Quiverstone configuration
+6. Repeat for each account
+
+**Advantages**:
+
+- Simple and straightforward process
+- Full control over each deployment
+- Easy to customize per account
+- No AWS Organizations requirement
+- Can deploy to accounts in different organizations
+- Immediate feedback on deployment success/failure
+- Easy to test and validate before wider deployment
+
+**Limitations**:
+
+- Manual process for each account
+- Time-consuming for large numbers of accounts
+- Potential for configuration drift between accounts
+- No automatic deployment to new accounts
+- Requires access to each individual account
+- More operational overhead to maintain
+
+**When to Choose Individual Deployment**:
+
+- You have fewer than 10 accounts
+- Accounts are not in an AWS Organization
+- Each account needs different configurations
+- You're testing before organization-wide deployment
+- You need maximum control over each deployment
+- Accounts are in different organizations
+
+---
+
+### StackSet Deployment
+
+**How It Works**: Deploy CloudFormation StackSets from your management account (or delegated administrator account) to automatically deploy roles across multiple accounts in your AWS Organization. StackSets use AWS Organizations integration to deploy to specified Organizational Units (OUs).
+
+**Use Cases**:
+
+- Large number of accounts (10+)
+- Organization-wide standardized deployments
+- Automatic deployment to new accounts
+- Consistent configuration across all accounts
+- Centralized management and updates
+- Organizations with mature AWS Organizations structure
+
+**Deployment Process**:
+
+1. Log into management account (or delegated admin account)
+2. Launch the StackSet template
+3. Specify target OUs (or root OU for all accounts)
+4. Configure parameters (applied to all accounts)
+5. StackSet automatically deploys to all accounts in specified OUs
+6. New accounts added to OUs automatically receive the role
+
+**Advantages**:
+
+- Deploy to hundreds of accounts simultaneously
+- Automatic deployment to new accounts (auto-deployment enabled)
+- Consistent configuration across all accounts
+- Centralized management from management account
+- Easy updates across all accounts
+- Automatic cleanup when accounts leave OUs
+- Parallel deployment for faster completion
+- Single point of configuration
+
+**Limitations**:
+
+- Requires AWS Organizations
+- Must be deployed from management or delegated admin account
+- Same configuration applied to all accounts in target OUs
+- More complex troubleshooting (failures in individual accounts)
+- Requires SERVICE_MANAGED permission model
+- Cannot customize per-account without multiple StackSets
+- Initial setup more complex than individual deployment
+
+**StackSet Configuration Details**:
+
+- **Permission Model**: SERVICE_MANAGED (uses AWS Organizations integration)
+- **Auto Deployment**: Enabled by default
+  - Automatically deploys to new accounts added to target OUs
+  - Automatically removes stacks when accounts leave OUs
+- **Concurrent Deployment**: 100% (deploys to all accounts simultaneously)
+- **Failure Tolerance**: 100% (continues even if some accounts fail)
+- **Region Concurrency**: PARALLEL (deploys to all regions simultaneously if multi-region)
+
+**When to Choose StackSet Deployment**:
+
+- You have 10 or more accounts
+- Accounts are in an AWS Organization
+- You want consistent configuration across accounts
+- You need automatic deployment to new accounts
+- You want centralized management and updates
+- You have a well-organized OU structure
+- You want to minimize operational overhead
+
+---
+
+### Deployment Type Decision Matrix
+
+| Criteria | Individual Account | StackSet |
+|----------|-------------------|----------|
+| **Account Count** | 1-10 | 10+ |
+| **AWS Organizations Required** | No | Yes |
+| **Deployment Speed** | Slow (manual) | Fast (parallel) |
+| **Configuration Flexibility** | High (per account) | Low (per StackSet) |
+| **Auto-Deploy to New Accounts** | No | Yes |
+| **Maintenance Overhead** | High | Low |
+| **Troubleshooting** | Easy | Moderate |
+| **Consistency** | Manual | Automatic |
+| **Best For** | Small deployments, testing | Large organizations |
+| **Update Process** | Manual per account | Centralized update |
+
+---
+
+### Hybrid Approach
+
+Many organizations use a combination of both deployment types:
+
+**Common Hybrid Patterns**:
+
+1. **StackSet for Standard Accounts + Individual for Special Cases**
+   - Use StackSet for most accounts with standard configuration
+   - Use individual deployment for accounts needing custom permissions or configurations
+
+2. **Individual for Testing + StackSet for Production**
+   - Test and validate with individual deployments in dev/test accounts
+   - Roll out to production using StackSets once validated
+
+3. **Multiple StackSets for Different OUs**
+   - Deploy different StackSets to different OUs with varying configurations
+   - Example: Read-only for development OU, Administrator for production OU
+
+4. **StackSet for Organization + Individual for External Accounts**
+   - Use StackSet for accounts in your organization
+   - Use individual deployment for accounts in partner organizations or standalone accounts
+
+
+## Configuration Guidance
+
+### Permission Levels
+
+All access role templates support eight AWS managed policies that can be enabled individually or in combination. Each permission level is controlled by a yes/no parameter.
+
+#### ReadOnlyAccess (pIsReadOnlyAccess)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/ReadOnlyAccess`
+
+**Description**: Grants permissions to view resources and basic metadata across all AWS services.
+
+**Use Cases**:
+- Account discovery and inventory
+- Compliance auditing and reporting
+- Cost analysis and optimization
+- Security posture assessment
+- Resource monitoring and alerting
+- Read-only access for support teams
+
+**What It Allows**:
+- List and describe operations for all AWS services
+- Read configuration data
+- View logs and metrics
+- Access billing and cost information (read-only)
+
+**What It Does NOT Allow**:
+- Creating, modifying, or deleting resources
+- Changing configurations
+- Managing IAM users or policies
+- Performing any write operations
+
+**Recommendation**: Enable by default for most deployments. This is the minimum permission level needed for Quiverstone account discovery.
+
+---
+
+#### AdministratorAccess (pIsAdministratorAccess)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/AdministratorAccess`
+
+**Description**: Provides full access to AWS services and resources.
+
+**Use Cases**:
+- Full account management
+- Infrastructure deployment and management
+- Emergency access for incident response
+- Complete administrative control
+
+**What It Allows**:
+- All actions on all AWS services
+- Full IAM management
+- Billing and cost management
+- Account settings modification
+
+**What It Does NOT Allow**:
+- Nothing - this is full administrative access
+
+**Security Warning**: Use with extreme caution. This permission level grants complete control over the AWS account. Consider using more restrictive permissions when possible.
+
+**Recommendation**: Only enable when full administrative access is required. Consider using PowerUserAccess or SystemAdministrator for most operational needs.
+
+---
+
+#### PowerUserAccess (pIsPowerUserAccess)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/PowerUserAccess`
+
+**Description**: Provides full access to AWS services and resources, but does not allow management of users and groups.
+
+**Use Cases**:
+- Application deployment and management
+- Infrastructure operations
+- Development and testing
+- Most operational tasks
+
+**What It Allows**:
+- Full access to most AWS services
+- Create, modify, and delete resources
+- Configure services and applications
+- Access to billing information
+
+**What It Does NOT Allow**:
+- Creating or managing IAM users
+- Creating or managing IAM groups
+- Modifying IAM policies
+- Managing organization-level settings
+
+**Recommendation**: Good balance between operational capability and security. Suitable for most production operational needs.
+
+---
+
+#### ViewOnlyAccess (pIsViewOnlyAccess)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/job-function/ViewOnlyAccess`
+
+**Description**: Grants permissions to view resources and basic metadata across all AWS services.
+
+**Use Cases**:
+- Similar to ReadOnlyAccess but with job function focus
+- Viewing resources without modification
+- Monitoring and observability
+
+**Difference from ReadOnlyAccess**: ViewOnlyAccess is a job function policy with slightly different scope than ReadOnlyAccess. Both provide read-only access but may differ in specific service permissions.
+
+**Recommendation**: Use ReadOnlyAccess unless you specifically need the ViewOnlyAccess job function policy.
+
+---
+
+#### SecurityAudit (pIsSecurityAudit)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/SecurityAudit`
+
+**Description**: Grants permissions to view configuration data for many AWS services and to review their logs.
+
+**Use Cases**:
+- Security compliance auditing
+- Security posture assessment
+- Configuration review
+- Log analysis for security events
+
+**What It Allows**:
+- Read access to security-related configurations
+- Access to CloudTrail logs
+- Access to Config data
+- Security group and network ACL inspection
+- IAM policy and role inspection
+
+**What It Does NOT Allow**:
+- Modifying security configurations
+- Creating or deleting resources
+- Changing IAM policies
+
+**Recommendation**: Enable for security-focused access. Often combined with ReadOnlyAccess for comprehensive visibility.
+
+---
+
+#### SystemAdministrator (pIsSystemAdministrator)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/job-function/SystemAdministrator`
+
+**Description**: Grants full access permissions necessary for resources required for application operations.
+
+**Use Cases**:
+- System administration tasks
+- Application infrastructure management
+- Operational maintenance
+- Resource provisioning
+
+**What It Allows**:
+- Full access to most AWS services
+- Resource creation and management
+- Configuration changes
+- Similar to PowerUserAccess with job function focus
+
+**What It Does NOT Allow**:
+- IAM user and group management
+- Organization-level changes
+
+**Recommendation**: Suitable for system administrators who need broad operational access without IAM management.
+
+---
+
+#### SupportUser (pIsSupportUser)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/job-function/SupportUser`
+
+**Description**: Grants permissions to troubleshoot and resolve issues in an AWS account. This policy also enables the user to contact AWS support to create and manage cases.
+
+**Use Cases**:
+- AWS Support case management
+- Troubleshooting assistance
+- Support ticket creation and tracking
+- Working with AWS Support teams
+
+**What It Allows**:
+- Create and manage AWS Support cases
+- Access to Trusted Advisor
+- Access to Health Dashboard
+- Limited read access for troubleshooting
+
+**What It Does NOT Allow**:
+- Modifying resources
+- Full read access to all services
+- Administrative operations
+
+**Recommendation**: Enable when you need to manage AWS Support cases through Quiverstone.
+
+---
+
+#### Billing (pIsBillingAccess)
+
+**AWS Managed Policy**: `arn:aws:iam::aws:policy/job-function/Billing`
+
+**Description**: Grants permissions for billing and cost management. This includes viewing account usage and viewing and downloading AWS bills.
+
+**Use Cases**:
+- Cost analysis and reporting
+- Billing management
+- Budget monitoring
+- Cost optimization
+
+**What It Allows**:
+- View and download bills
+- Access to Cost Explorer
+- Budget creation and management
+- Cost and usage reports
+- Payment method management
+
+**What It Does NOT Allow**:
+- Resource management
+- Service configuration
+- Non-billing operations
+
+**Recommendation**: Enable for financial management and cost optimization use cases.
+
+---
+
+### Combining Permission Levels
+
+Multiple permission levels can be enabled simultaneously. The role will have the union of all enabled permissions.
+
+**Common Combinations**:
+
+- **ReadOnlyAccess + SecurityAudit**: Comprehensive read access with enhanced security visibility
+- **ReadOnlyAccess + Billing**: Full visibility including cost information
+- **PowerUserAccess + Billing**: Operational access with cost management
+- **AdministratorAccess only**: Full administrative control (use sparingly)
+
+**Best Practice**: Start with minimal permissions (ReadOnlyAccess) and add additional permissions only as needed.
+
+---
+
+### External ID Configuration
+
+External ID is a security feature that helps prevent the "confused deputy" problem in cross-account access.
+
+#### What is External ID?
+
+External ID is a shared secret between you and Quiverstone that must be provided when assuming the role. It acts as an additional authentication factor beyond the AWS account trust.
+
+#### Why Use External ID?
+
+**Confused Deputy Problem**: Without External ID, if an attacker knows your role ARN, they could potentially trick Quiverstone into accessing your account on their behalf. External ID prevents this by requiring knowledge of the shared secret.
+
+#### External ID Best Practices
+
+**Generation**:
+- Generate a unique random string for each role or account
+- Minimum length: 32 characters
+- Use cryptographically secure random generation
+- Include letters, numbers, and special characters
+- Example tools: `openssl rand -base64 32`, password managers, AWS Secrets Manager
+
+**Storage**:
+- Store External IDs securely (password manager, secrets manager, encrypted vault)
+- Treat External IDs like passwords
+- Do not commit External IDs to version control
+- Limit access to External IDs to authorized personnel
+
+**Rotation**:
+- Rotate External IDs periodically according to your security policies
+- Coordinate rotation with Quiverstone configuration updates
+- Document rotation procedures
+- Consider automated rotation for large deployments
+
+**Uniqueness**:
+- Use unique External IDs per account (recommended)
+- Or use unique External IDs per role type
+- Avoid reusing External IDs across multiple accounts
+- Unique IDs limit blast radius if one is compromised
+
+**When External ID is Required**:
+- Direct access roles: Strongly recommended
+- Chained access roles: Recommended for both intermediate and destination roles
+- Browser access roles: Not supported
+
+---
+
+### Role Naming Best Practices
+
+#### Naming Conventions
+
+**Consistency**: Use consistent naming across all accounts
+- Good: `QuiverstoneDirectAccess`, `QuiverstoneChainedAccess`, `QuiverstoneBrowserSession`
+- Avoid: `quiverstone-role`, `QS-Access`, `access-role-1`
+
+**Descriptive**: Include the access method in the name
+- `QuiverstoneDirectAccess` - clearly indicates direct access
+- `QuiverstoneChainedAccess` - clearly indicates chained access
+- `QuiverstoneBrowserSession` - clearly indicates browser access
+
+**Environment Indicators** (optional): Include environment in name if using different roles per environment
+- `QuiverstoneDirectAccess-Prod`
+- `QuiverstoneDirectAccess-Dev`
+- `QuiverstoneDirectAccess-Test`
+
+**Organization Indicators** (optional): Include organization or business unit for multi-org deployments
+- `QuiverstoneDirectAccess-OrgA`
+- `QuiverstoneDirectAccess-Finance`
+
+#### Role Name Constraints
+
+- Maximum length: 64 characters
+- Allowed characters: A-Z, a-z, 0-9, plus (+), equals (=), comma (,), period (.), at (@), underscore (_), hyphen (-)
+- Must be unique within the account
+- Case sensitive
+
+#### Default Names
+
+The templates provide sensible defaults:
+- Browser access: `QuiverstoneBrowserSession`
+- Direct access: `QuiverstoneDirectAccess`
+- Chained access: `QuiverstoneChainedAccess`
+- Intermediate: `QuiverstoneTrustedIntermediate`
+
+**Recommendation**: Use the defaults unless you have specific naming requirements. Consistent names simplify management and troubleshooting.
+
+---
+
+### StackSet Configuration Options
+
+When deploying via StackSets, additional configuration options are available.
+
+#### Deployment Targets
+
+**Organizational Units (OUs)**:
+- Specify one or more OU IDs (comma-separated)
+- Use root OU ID to deploy to all accounts
+- StackSet deploys to all accounts in specified OUs
+- New accounts added to OUs automatically receive deployment
+
+**Finding OU IDs**:
+1. Open AWS Organizations console
+2. Navigate to AWS accounts
+3. Select an OU
+4. Copy the OU ID (format: `ou-xxxx-yyyyyyyy`)
+
+#### Deployment Region
+
+**Single Region Deployment**: StackSets deploy to a single region (specified in pDeploymentRegion parameter)
+- IAM roles are global, so single region deployment is sufficient
+- Default: us-east-1
+- Choose your organization's home region
+
+**Why Single Region**: IAM is a global service. Deploying the role in one region makes it available globally.
+
+#### Auto-Deployment Settings
+
+**Enabled by Default**: New accounts added to target OUs automatically receive the role
+
+**Retain Stacks on Account Removal**: Disabled by default
+- When an account leaves a target OU, the stack is automatically deleted
+- Ensures clean removal of roles when accounts move
+
+#### Concurrent Deployment
+
+**Max Concurrent Percentage**: 100% (default)
+- Deploys to all accounts simultaneously
+- Fastest deployment time
+- Can be reduced if you want more controlled rollout
+
+**Failure Tolerance Percentage**: 100% (default)
+- Continues deployment even if some accounts fail
+- Allows successful deployments to complete
+- Failed accounts can be retried individually
+
+#### Region Concurrency
+
+**PARALLEL** (default): If deploying to multiple regions, deploys to all regions simultaneously
+
+**Note**: For IAM roles, single region deployment is recommended since IAM is global.
+
+
+## Deployment Scenarios
+
+### Small Organizations (1-10 Accounts)
+
+**Scenario**: Startup or small business with a handful of AWS accounts for different environments or projects.
+
+**Recommended Approach**: Individual account deployment with direct access
+
+**Configuration**:
+- Template: `direct-access-role.yaml`
+- Deployment: Individual to each account
+- Permissions: ReadOnlyAccess (minimum), add others as needed
+- External ID: Unique per account (recommended)
+
+**Deployment Steps**:
+1. Generate unique External ID for each account
+2. Deploy direct-access-role.yaml to each account individually
+3. Configure ReadOnlyAccess and any additional permissions needed
+4. Copy role ARN and External ID from each deployment
+5. Configure each account in Quiverstone
+
+**Advantages**:
+- Simple and straightforward
+- Full control over each account
+- Easy to customize per account
+- No AWS Organizations requirement
+
+**Considerations**:
+- Manual process for each account
+- Manageable at this scale
+- Consider StackSets if you plan to grow beyond 10 accounts
+
+---
+
+### Medium Organizations (10-50 Accounts)
+
+**Scenario**: Growing organization with multiple teams, environments, and projects across dozens of accounts.
+
+**Recommended Approach**: StackSet deployment with direct access
+
+**Configuration**:
+- Template: `direct-access-role-stackset.yaml`
+- Deployment: StackSet from management account
+- Permissions: ReadOnlyAccess + additional permissions per OU
+- External ID: Single External ID for all accounts (or unique per OU)
+
+**Deployment Steps**:
+1. Organize accounts into OUs by environment or team
+2. Generate External ID(s)
+3. Deploy direct-access-role-stackset.yaml from management account
+4. Target root OU or specific OUs
+5. Configure permissions appropriate for each OU
+6. StackSet automatically deploys to all accounts
+7. Configure organization in Quiverstone with role ARN pattern and External ID
+
+**Advantages**:
+- Automated deployment to all accounts
+- Consistent configuration
+- Auto-deployment to new accounts
+- Centralized management
+
+**Considerations**:
+- Requires AWS Organizations
+- Same configuration per StackSet (use multiple StackSets for different configurations)
+- Consider different StackSets for different OUs with varying permission needs
+
+**Variation - Multiple StackSets**:
+- Deploy one StackSet to development OU with ReadOnlyAccess
+- Deploy another StackSet to production OU with PowerUserAccess
+- Allows different permission levels per environment
+
+---
+
+### Large Organizations (50+ Accounts)
+
+**Scenario**: Enterprise organization with hundreds of accounts across multiple business units, regions, and environments.
+
+**Recommended Approach**: Multiple StackSets with direct access, organized by OU structure
+
+**Configuration**:
+- Template: `direct-access-role-stackset.yaml` (multiple instances)
+- Deployment: Multiple StackSets targeting different OUs
+- Permissions: Vary by OU and business unit requirements
+- External ID: Unique per StackSet or per OU
+
+**Deployment Steps**:
+1. Design OU structure aligned with business units and environments
+2. Define permission requirements per OU
+3. Generate External IDs per StackSet
+4. Deploy multiple StackSets:
+   - Development OU: ReadOnlyAccess
+   - Staging OU: PowerUserAccess
+   - Production OU: ReadOnlyAccess + SecurityAudit
+   - Infrastructure OU: SystemAdministrator
+5. Configure organization in Quiverstone with role patterns
+
+**Advantages**:
+- Scales to hundreds of accounts
+- Granular control per OU
+- Automated deployment and updates
+- Consistent within each OU
+
+**Considerations**:
+- Requires well-designed OU structure
+- Multiple StackSets to manage
+- Document which StackSet applies to which OU
+- Consider automation for StackSet management
+
+**Best Practices**:
+- Use consistent naming: `QuiverstoneDirectAccess-Dev`, `QuiverstoneDirectAccess-Prod`
+- Document StackSet to OU mappings
+- Implement change control for StackSet updates
+- Monitor StackSet deployment status
+- Use CloudFormation drift detection
+
+---
+
+### Highly Regulated Environments
+
+**Scenario**: Financial services, healthcare, government, or other highly regulated industries with strict security and compliance requirements.
+
+**Recommended Approach**: Chained access with intermediate account controls
+
+**Configuration**:
+- Templates: `trusted-intermediate-role.yaml` + `chained-access-role-stackset.yaml`
+- Deployment: Intermediate role in security account, StackSet for destination roles
+- Permissions: Minimal required permissions (ReadOnlyAccess + specific additions)
+- External ID: Unique External IDs for both intermediate and destination roles
+- Trust: Named role trust (not account-level trust)
+
+**Deployment Steps**:
+1. Designate or create a security/audit account as intermediate account
+2. Deploy trusted-intermediate-role.yaml to intermediate account:
+   - Use External ID
+   - Use `specific-role-any-account` scope
+   - Specify destination role name
+3. Implement additional controls in intermediate account:
+   - CloudTrail logging
+   - CloudWatch alarms for role assumptions
+   - Optional: IP restrictions, time-based access
+4. Deploy chained-access-role-stackset.yaml to target accounts:
+   - Use External ID (can be different from intermediate)
+   - Use `Named` trust (specific role, not account)
+   - Specify intermediate role name
+   - Configure minimal required permissions
+5. Configure chained access in Quiverstone
+
+**Advantages**:
+- Additional security layer through intermediate account
+- Centralized access control and auditing
+- Can implement custom security controls
+- Meets requirements for environments prohibiting direct external trust
+- Quick revocation by modifying only intermediate role
+
+**Security Enhancements**:
+- Enable CloudTrail in intermediate account with log file validation
+- Set up CloudWatch alarms for unusual role assumption patterns
+- Implement IP-based restrictions in intermediate role trust policy
+- Use time-based access controls if needed
+- Regular audit of intermediate role usage
+- Separate External IDs for defense in depth
+
+**Compliance Considerations**:
+- Document the role chain for auditors
+- Maintain audit logs for all role assumptions
+- Implement least privilege permissions
+- Regular access reviews
+- Automated compliance checks
+
+---
+
+### Multi-Organization Deployment
+
+**Scenario**: Managing multiple separate AWS Organizations (e.g., acquired companies, partner organizations, separate business entities).
+
+**Recommended Approach**: Chained access with separate intermediate roles per organization
+
+**Configuration**:
+- Templates: Multiple `trusted-intermediate-role.yaml` + `chained-access-role-stackset.yaml` per org
+- Deployment: One intermediate role per organization, StackSets within each organization
+- Permissions: Vary by organization requirements
+- External ID: Unique per organization
+
+**Deployment Steps**:
+1. For each organization:
+   - Deploy intermediate role to a designated account in that organization
+   - Deploy chained-access-role-stackset to target accounts in that organization
+   - Use unique External IDs per organization
+2. Configure each organization separately in Quiverstone
+3. Maintain separate role chains per organization
+
+**Advantages**:
+- Isolation between organizations
+- Independent security controls per organization
+- Flexible permission models per organization
+- Clear organizational boundaries
+
+**Considerations**:
+- More complex to manage multiple intermediate roles
+- Document which intermediate role serves which organization
+- Consider naming conventions to identify organization
+- May need separate Quiverstone configurations per organization
+
+---
+
+### Development and Testing Environments
+
+**Scenario**: Separate AWS accounts for development, testing, and experimentation.
+
+**Recommended Approach**: Individual deployment with browser access or direct access
+
+**Configuration**:
+- Template: `browser-access-role.yaml` or `direct-access-role.yaml`
+- Deployment: Individual to each dev/test account
+- Permissions: AdministratorAccess or PowerUserAccess (broader permissions acceptable in dev/test)
+- External ID: Optional for dev/test (required for direct access)
+
+**Deployment Steps**:
+1. For browser access:
+   - Deploy browser-access-role.yaml
+   - Specify your AWS account as trusted account
+   - Enable broader permissions (PowerUserAccess or AdministratorAccess)
+2. For direct access:
+   - Deploy direct-access-role.yaml
+   - Use External ID
+   - Enable broader permissions
+
+**Advantages**:
+- Quick setup for development
+- Broader permissions acceptable in non-production
+- Easy to test and experiment
+- Browser access provides familiar console experience
+
+**Considerations**:
+- Use different roles for dev/test vs production
+- Don't use browser access in production
+- Consider separate External IDs for dev/test
+- Document that these are non-production configurations
+
+---
+
+### Disaster Recovery and Emergency Access
+
+**Scenario**: Need for emergency access during incidents or disasters.
+
+**Recommended Approach**: Pre-deployed direct access roles with AdministratorAccess, break-glass procedures
+
+**Configuration**:
+- Template: `direct-access-role.yaml`
+- Deployment: Individual or StackSet to all critical accounts
+- Permissions: AdministratorAccess
+- External ID: Highly secure, stored in break-glass procedure
+- Role Name: `QuiverstoneEmergencyAccess` (distinct from regular access)
+
+**Deployment Steps**:
+1. Deploy separate emergency access roles to critical accounts
+2. Configure with AdministratorAccess
+3. Use highly secure External ID
+4. Store External ID in secure break-glass procedure
+5. Document emergency access procedures
+6. Do NOT configure in Quiverstone for regular use
+
+**Break-Glass Procedure**:
+1. Emergency access roles are pre-deployed but not configured in Quiverstone
+2. During emergency, retrieve External ID from secure storage
+3. Configure emergency role in Quiverstone
+4. Use for emergency operations
+5. After emergency, remove configuration from Quiverstone
+6. Audit all actions taken during emergency
+7. Rotate External ID after use
+
+**Advantages**:
+- Pre-deployed for immediate use
+- Full administrative access for emergency response
+- Separate from regular access roles
+- Clear audit trail
+
+**Security Considerations**:
+- Store External ID in highly secure location (physical safe, secure vault)
+- Limit knowledge of External ID to authorized personnel
+- Implement strict procedures for emergency use
+- Mandatory audit after each use
+- Rotate External ID after emergency use
+- Consider time-based access controls
+
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Issue: "Access Denied" when assuming role
+
+**Symptoms**: Quiverstone cannot assume the role, returns AccessDenied error
+
+**Possible Causes and Solutions**:
+
+1. **Incorrect Trust Policy**
+   - **Check**: Verify the trust policy allows the correct principal
+   - **Direct Access**: Should trust Quiverstone production account (684035162433)
+   - **Chained Access**: Should trust intermediate account or specific intermediate role
+   - **Browser Access**: Should trust your AWS account
+   - **Solution**: Update trust policy in IAM console or redeploy with correct parameters
+
+2. **External ID Mismatch**
+   - **Check**: Verify External ID in Quiverstone matches the role's trust policy
+   - **Solution**: Update External ID in Quiverstone or redeploy role with correct External ID
+   - **Note**: External ID is case-sensitive
+
+3. **Role Name Mismatch**
+   - **Check**: Verify role ARN in Quiverstone matches the actual role ARN
+   - **Solution**: Copy role ARN from CloudFormation outputs or IAM console
+   - **Note**: Role names are case-sensitive
+
+4. **Intermediate Role Issues (Chained Access)**
+   - **Check**: Verify intermediate role exists and is configured correctly
+   - **Check**: Verify intermediate role can assume destination role
+   - **Solution**: Test intermediate role assumption separately
+   - **Solution**: Verify destination role trusts intermediate role
+
+5. **Permission Boundary Restrictions**
+   - **Check**: Verify no permission boundaries are restricting role assumption
+   - **Solution**: Review and adjust permission boundaries if present
+
+---
+
+#### Issue: CloudFormation stack creation fails
+
+**Symptoms**: Stack fails to create, rolls back with error
+
+**Possible Causes and Solutions**:
+
+1. **Role Name Already Exists**
+   - **Error**: "Role with name X already exists"
+   - **Solution**: Choose a different role name or delete existing role
+   - **Check**: Look in IAM console for existing roles
+
+2. **Insufficient Permissions**
+   - **Error**: "User is not authorized to perform iam:CreateRole"
+   - **Solution**: Ensure you have IAM permissions to create roles
+   - **Required Permissions**: iam:CreateRole, iam:PutRolePolicy, iam:AttachRolePolicy
+
+3. **Invalid Parameter Values**
+   - **Error**: "Parameter validation failed"
+   - **Solution**: Review parameter values for correct format
+   - **Common Issues**: Account IDs must be 12 digits, External ID max 1224 characters
+
+4. **StackSet Deployment Failures**
+   - **Error**: "StackSet operation failed in some accounts"
+   - **Solution**: Check StackSet operations tab for per-account failures
+   - **Solution**: Review CloudFormation events in failed accounts
+   - **Common Cause**: Insufficient permissions in target accounts
+
+---
+
+#### Issue: Role exists but Quiverstone cannot discover accounts
+
+**Symptoms**: Role assumption works but no accounts appear in Quiverstone
+
+**Possible Causes and Solutions**:
+
+1. **Missing Organizations Permissions**
+   - **Check**: Verify role has Organizations read permissions
+   - **Solution**: All access role templates include Organizations permissions by default
+   - **Solution**: If using custom role, add Organizations read permissions
+
+2. **Role Deployed to Wrong Account**
+   - **Check**: For inventory, role should be in management account or delegated admin
+   - **Solution**: Deploy inventory role to correct account
+   - **Note**: Access roles can be in any account
+
+3. **Organizations Not Enabled**
+   - **Check**: Verify AWS Organizations is enabled in the account
+   - **Solution**: Enable AWS Organizations if needed
+
+---
+
+#### Issue: StackSet not deploying to new accounts
+
+**Symptoms**: New accounts added to OU don't receive the role
+
+**Possible Causes and Solutions**:
+
+1. **Auto-Deployment Not Enabled**
+   - **Check**: Verify StackSet has auto-deployment enabled
+   - **Solution**: Update StackSet to enable auto-deployment
+   - **Note**: All templates enable auto-deployment by default
+
+2. **Account Not in Target OU**
+   - **Check**: Verify new account is in an OU targeted by the StackSet
+   - **Solution**: Move account to target OU or update StackSet targets
+
+3. **StackSet Operation In Progress**
+   - **Check**: Check StackSet operations tab for in-progress operations
+   - **Solution**: Wait for current operation to complete
+   - **Note**: StackSets process one operation at a time
+
+4. **Service-Managed Permissions Issue**
+   - **Check**: Verify StackSet uses SERVICE_MANAGED permission model
+   - **Solution**: Ensure CloudFormation has Organizations integration enabled
+   - **Solution**: Check for service control policies blocking StackSet operations
+
+---
+
+#### Issue: Cannot update existing role
+
+**Symptoms**: CloudFormation update fails or changes don't apply
+
+**Possible Causes and Solutions**:
+
+1. **Role Name Change Not Allowed**
+   - **Error**: "Cannot update role name"
+   - **Solution**: Role name changes require replacement (delete and recreate)
+   - **Workaround**: Create new role with new name, update Quiverstone, delete old role
+
+2. **Managed Policy Conflicts**
+   - **Error**: "Cannot attach policy"
+   - **Solution**: Check for policy attachment limits (10 managed policies per role)
+   - **Solution**: Reduce number of enabled permissions
+
+3. **Trust Policy Update Issues**
+   - **Check**: Verify trust policy changes are valid
+   - **Solution**: Review trust policy syntax
+   - **Solution**: Ensure principal ARNs are correct
+
+---
+
+#### Issue: Chained access not working
+
+**Symptoms**: Intermediate role works but cannot assume destination role
+
+**Possible Causes and Solutions**:
+
+1. **Deployment Order**
+   - **Check**: Verify intermediate role was deployed before destination role
+   - **Solution**: Deploy intermediate role first, then destination role
+
+2. **Trust Configuration Mismatch**
+   - **Check**: Verify destination role trusts intermediate role
+   - **Check**: If using Named trust, verify intermediate role name matches
+   - **Solution**: Update destination role trust policy
+   - **Solution**: Redeploy with correct intermediate role name
+
+3. **External ID Mismatch**
+   - **Check**: Verify both External IDs are configured correctly in Quiverstone
+   - **Solution**: Update Quiverstone configuration with correct External IDs
+   - **Note**: Intermediate and destination can have different External IDs
+
+4. **Intermediate Role Permissions**
+   - **Check**: Verify intermediate role has permission to assume destination role
+   - **Solution**: Check intermediate role's assume role scope configuration
+   - **Solution**: Ensure scope allows assuming the destination role
+
+---
+
+### Validation Steps
+
+Use these steps to validate your access role deployment:
+
+#### Step 1: Verify Role Exists
+
+```bash
+# Using AWS CLI
+aws iam get-role --role-name QuiverstoneDirectAccess
+
+# Expected: Role details returned
+# If error: Role doesn't exist or you don't have permissions
+```
+
+#### Step 2: Verify Trust Policy
+
+```bash
+# Get role trust policy
+aws iam get-role --role-name QuiverstoneDirectAccess --query 'Role.AssumeRolePolicyDocument'
+
+# Check:
+# - Correct principal (Quiverstone account, intermediate account, or your account)
+# - External ID present (if configured)
+# - Correct External ID value
+```
+
+#### Step 3: Verify Attached Policies
+
+```bash
+# List attached managed policies
+aws iam list-attached-role-policies --role-name QuiverstoneDirectAccess
+
+# Expected: See enabled permission policies (ReadOnlyAccess, etc.)
+```
+
+#### Step 4: Test Role Assumption (Direct Access)
+
+```bash
+# Attempt to assume role (requires Quiverstone credentials)
+aws sts assume-role \
+  --role-arn arn:aws:iam::ACCOUNT_ID:role/QuiverstoneDirectAccess \
+  --role-session-name test \
+  --external-id YOUR_EXTERNAL_ID
+
+# Expected: Temporary credentials returned
+# If error: Check trust policy and External ID
+```
+
+#### Step 5: Verify Organizations Permissions
+
+```bash
+# Test Organizations access (using assumed role credentials)
+aws organizations describe-organization
+
+# Expected: Organization details returned
+# If error: Missing Organizations permissions
+```
+
+#### Step 6: Verify StackSet Deployment
+
+```bash
+# List StackSet instances
+aws cloudformation list-stack-instances \
+  --stack-set-name quiverstone-direct-access-role
+
+# Expected: List of accounts where role is deployed
+# Check: Verify all expected accounts are present
+```
+
+#### Step 7: Check StackSet Operation Status
+
+```bash
+# List StackSet operations
+aws cloudformation list-stack-set-operations \
+  --stack-set-name quiverstone-direct-access-role
+
+# Check: Verify latest operation succeeded
+# If failed: Check operation details for error messages
+```
+
+---
+
+### Debug Checklist
+
+Use this checklist when troubleshooting access issues:
+
+**Basic Checks**:
+- [ ] Role exists in the correct AWS account
+- [ ] Role name matches configuration in Quiverstone
+- [ ] Role ARN is correct in Quiverstone
+
+**Trust Policy Checks**:
+- [ ] Trust policy allows correct principal
+- [ ] External ID is present in trust policy (if using External ID)
+- [ ] External ID matches Quiverstone configuration
+- [ ] External ID is case-sensitive match
+
+**Permission Checks**:
+- [ ] At least one permission level is enabled
+- [ ] Required permissions are attached (ReadOnlyAccess minimum)
+- [ ] Organizations permissions are present
+- [ ] No permission boundaries restricting access
+
+**Chained Access Specific**:
+- [ ] Intermediate role exists and is configured
+- [ ] Intermediate role was deployed before destination role
+- [ ] Destination role trusts intermediate role (or account)
+- [ ] Intermediate role name matches in destination trust policy
+- [ ] Both External IDs are configured in Quiverstone
+- [ ] Intermediate role has permission to assume destination role
+
+**StackSet Specific**:
+- [ ] StackSet deployed from management account
+- [ ] Target OUs are correct
+- [ ] Auto-deployment is enabled
+- [ ] Latest StackSet operation succeeded
+- [ ] All expected accounts have stack instances
+- [ ] No service control policies blocking deployment
+
+**Configuration Checks**:
+- [ ] Quiverstone has correct role ARN
+- [ ] Quiverstone has correct External ID(s)
+- [ ] Account ID is correct in Quiverstone
+- [ ] Configuration saved in Quiverstone
+
+---
+
+### Getting Help
+
+If you continue to experience issues after following this troubleshooting guide:
+
+1. **Gather Information**:
+   - Role ARN
+   - Error messages (exact text)
+   - CloudFormation stack events
+   - CloudTrail logs for AssumeRole attempts
+   - StackSet operation details (if applicable)
+
+2. **Check CloudTrail**:
+   - Look for AssumeRole events
+   - Check for AccessDenied errors
+   - Review error messages for specific causes
+
+3. **Review CloudFormation Events**:
+   - Check stack events for deployment errors
+   - Review StackSet operation details
+   - Look for per-account failure reasons
+
+4. **Contact Support**:
+   - Provide gathered information
+   - Include role configuration details
+   - Describe steps already attempted
+   - Include relevant CloudTrail or CloudFormation logs
+

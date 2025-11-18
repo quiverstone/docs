@@ -1,0 +1,111 @@
+---
+title: "IAM Roles Overview"
+description: "Deploy Quiverstone IAM roles for secure access to your AWS accounts and organizations"
+---
+
+Quiverstone uses IAM roles to securely access your AWS accounts and organizations. Choose the role type that matches your needs and follow the quick-start guides for rapid deployment.
+
+## Role Types
+
+### Access Roles
+
+Provide varying levels of access to individual AWS accounts, from read-only to full administrative access. Deploy to member accounts for day-to-day operations and management.
+
+**Use access roles when you need to:**
+- Grant Quiverstone access to individual AWS accounts
+- Configure specific permission levels (read-only, administrator, etc.)
+- Enable browser-based console access
+- Deploy roles across multiple accounts using StackSets
+
+[Deploy Access Roles →](/setup/accounts/access)
+
+### Inventory Roles
+
+Provide read-only access to AWS Organizations for account discovery and organizational structure mapping. Deploy to management or delegated administrator accounts.
+
+**Use inventory roles when you need to:**
+- Enable Quiverstone to discover accounts in your organization
+- Map organizational structure (OUs, accounts, hierarchy)
+- Retrieve account metadata and configuration
+- Monitor organizational changes over time
+
+[Deploy Inventory Roles →](/setup/organizations/inventory)
+
+### Intermediate Roles
+
+Enable chained access architecture by serving as an intermediate hop between Quiverstone and destination accounts. Deploy to a dedicated trusted account for enhanced security.
+
+**Use intermediate roles when you need to:**
+- Add an additional security layer beyond direct access
+- Meet compliance requirements for intermediate controls
+- Audit all role assumptions through a single point
+- Implement role chaining architecture
+
+<Note>
+Intermediate roles are deployed as part of chained access setup. See the access and inventory role guides for complete chained deployment instructions.
+</Note>
+
+## Choosing the Right Roles
+
+### For Small Organizations (< 10 accounts)
+
+**Recommended:**
+- Direct access roles (individual deployment)
+- Direct inventory role (management account)
+
+**Why:** Simple setup, quick deployment, minimal configuration overhead.
+
+### For Medium Organizations (10-50 accounts)
+
+**Recommended:**
+- Direct access roles (StackSet deployment)
+- Direct inventory role (management account)
+
+**Why:** Consistent configuration, automatic deployment to new accounts, centralized management.
+
+### For Large Organizations (50+ accounts)
+
+**Recommended:**
+- Chained access roles (StackSet deployment)
+- Chained inventory role (management account)
+- Intermediate role (trusted account)
+
+**Why:** Enhanced security, centralized audit point, scalable management, compliance-friendly.
+
+### For Highly Regulated Environments
+
+**Recommended:**
+- Chained access roles with named trust
+- Chained inventory role with named trust
+- Intermediate role with specific scope
+
+**Why:** Maximum security through role chaining, comprehensive audit trail, meets compliance requirements.
+
+## Quick-Start Guides
+
+<CardGroup cols={2}>
+  <Card title="Access Roles" icon="key" href="/setup/accounts/access">
+    Deploy roles for account access with configurable permissions
+  </Card>
+  <Card title="Inventory Roles" icon="list" href="/setup/organizations/inventory">
+    Deploy roles for organization discovery and account inventory
+  </Card>
+</CardGroup>
+
+## Security Features
+
+All Quiverstone IAM roles implement security best practices:
+
+- **External ID Validation**: Additional security token prevents unauthorized access
+- **Principle of Least Privilege**: Configurable permissions with read-only defaults
+- **CloudTrail Logging**: All role assumptions automatically logged
+- **MFA Compatible**: Works with MFA-enabled accounts
+
+## Next Steps
+
+1. Choose the role type that matches your needs
+2. Follow the quick-start guide for rapid deployment
+3. Configure Quiverstone with the role ARN and External ID
+4. Verify access in the Quiverstone application
+
+For detailed configuration options, security considerations, and troubleshooting, see the comprehensive reference documentation linked from each quick-start guide.
