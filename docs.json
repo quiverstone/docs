@@ -12,6 +12,11 @@
   "primaryTab": {
     "name": "Home"
   },
+  "integrations": {
+    "ga4": {
+        "measurementId": "G-CJDR7P4VLD"
+    }
+  },
   "navigation": {
     "tabs": [
       {
