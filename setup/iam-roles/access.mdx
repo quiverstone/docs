@@ -44,6 +44,7 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
 - **pRoleName** (String, Default: `QuiverstoneBrowserSession`)
   - Name for the browser-accessible role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
 - **pTrustedAccountId** (String, Required)
   - AWS Account ID you have access to that can assume this role via browser session
@@ -92,12 +93,18 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
 - **pRoleName** (String, Default: `QuiverstoneDirectAccess`)
   - Name for the federated access role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
 - **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+- **pExternalId** (String, Required for Production, Max: 1224 characters)
+  - Security token for role assumption
+  - **Required for production environments** - prevents confused deputy attacks
+  - Generate a unique random string (minimum 32 characters)
+  - Store securely - required when configuring Quiverstone
+  - Never share or commit External IDs to version control
   - Security token for role assumption
   - Strongly recommended for production environments
   - Generate a unique random string (minimum 32 characters)
@@ -140,11 +147,14 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
 - **pChainedAccessRoleName** (String, Default: `QuiverstoneChainedAccess`, Required)
   - Name for the destination account access role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
-- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+- **pExternalId** (String, Required for Production, Max: 1224 characters)
   - External ID for role assumption
   - Can be different from intermediate role External ID
-  - Recommended for enhanced security
+  - **Required for production** - use a different value than the intermediate role External ID
+  - Generate a unique random string (minimum 32 characters)
+  - Never share or commit External IDs to version control
 
 - **pIntermediateAccountId** (String, Required)
   - AWS Account ID that serves as the intermediate hop
@@ -156,12 +166,13 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
   - Options:
     - `All`: Trust all principals in the intermediate account
     - `Named`: Trust only the specific role named in pIntermediateRoleName
-  - Recommended: Use `Named` for enhanced security
+  - **Recommended**: Use `Named` for enhanced security
 
 - **pIntermediateRoleName** (String, Default: `QuiverstoneTrustedIntermediate`)
   - Name of the role in the intermediate account
   - Required if pTrustPrincipals is set to `Named`
   - Populate for reference even if trusting entire account
+  - **Update this if you changed the intermediate role name**
 
 - **pIntermediateRoleExternalId** (String, Optional, Max: 1224 characters)
   - External ID for intermediate role assumption
@@ -1600,4 +1611,186 @@ If you continue to experience issues after following this troubleshooting guide:
    - Include role configuration details
    - Describe steps already attempted
    - Include relevant CloudTrail or CloudFormation logs
+
+---
+
+## Security Best Practices
+
+### Custom Role Names
+
+<Warning>
+**Always Change Default Role Names**: Using default role names (like `QuiverstoneDirectAccess`) makes it easier for unauthorized parties to discover and potentially target your roles. Custom role names add an additional layer of security through obscurity.
+</Warning>
+
+**Recommendations**:
+- Use organization-specific prefixes: `MyCompany-Access-Production`
+- Include environment indicators: `CustomAccess-Prod`, `CustomAccess-Dev`
+- Avoid predictable patterns
+- Document your naming convention securely
+- Use consistent naming across all accounts
+
+### External ID Requirements
+
+<Warning>
+**External ID is Required for Production**: Never deploy production access roles without an External ID. This is your primary defense against confused deputy attacks and unauthorized role assumptions.
+</Warning>
+
+**Best Practices**:
+- Generate cryptographically secure random strings (minimum 32 characters)
+- Use unique External IDs per role or per account
+- Store External IDs in a secure password manager or secrets management system
+- Never commit External IDs to version control
+- Rotate External IDs periodically (quarterly or annually)
+- Use different External IDs for intermediate and destination roles in chained access
+
+**Generation Examples**:
+```bash
+# Using OpenSSL
+openssl rand -base64 32
+
+# Using Python
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Using AWS Secrets Manager
+aws secretsmanager get-random-password --password-length 32
+```
+
+### Protecting Role Configurations from Inspection
+
+<Warning>
+**Privilege Escalation Risk**: If support or operational roles can view IAM role trust policies and permissions, they may be able to identify External IDs, understand trust relationships, and potentially escalate their privileges. Implementing role visibility restrictions is a critical security control.
+</Warning>
+
+When deploying support or access roles, prevent non-administrative roles from viewing role permissions, trust policies, and External ID configurations. This prevents tiered support teams and other roles from potentially escalating their own privileges.
+
+### Example Deny Policy
+
+Apply this policy to roles that should NOT be able to view sensitive role configurations:
+
+**JSON Format**:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyRoleInspection",
+      "Effect": "Deny",
+      "Action": [
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/*Access*",
+        "arn:aws:iam::*:role/*Support*",
+        "arn:aws:iam::*:role/*Inventory*",
+        "arn:aws:iam::*:role/*Intermediate*"
+      ]
+    }
+  ]
+}
+```
+
+**YAML Format** (for CloudFormation):
+
+```yaml
+DenyRoleInspectionPolicy:
+  Type: AWS::IAM::Policy
+  Properties:
+    PolicyName: DenyRoleInspection
+    PolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Sid: DenyRoleInspection
+          Effect: Deny
+          Action:
+            - iam:GetRole
+            - iam:GetRolePolicy
+            - iam:ListRolePolicies
+            - iam:ListAttachedRolePolicies
+          Resource:
+            - arn:aws:iam::*:role/*Access*
+            - arn:aws:iam::*:role/*Support*
+            - arn:aws:iam::*:role/*Inventory*
+            - arn:aws:iam::*:role/*Intermediate*
+    Roles:
+      - TieredSupportRole
+      - OperationsRole
+      - DeveloperRole
+```
+
+### Policy Explanation
+
+- **DenyRoleInspection**: Prevents viewing role details, trust policies, and attached policies
+- **Resource Patterns**: Adjust the patterns to match your custom role names
+  - `*Access*`: Matches roles containing "Access"
+  - `*Support*`: Matches roles containing "Support"
+  - `*Inventory*`: Matches roles containing "Inventory"
+  - `*Intermediate*`: Matches roles containing "Intermediate"
+- **Actions Denied**:
+  - `iam:GetRole`: Prevents viewing role details including trust policy (where External ID is visible)
+  - `iam:GetRolePolicy`: Prevents viewing inline policies
+  - `iam:ListRolePolicies`: Prevents listing inline policies
+  - `iam:ListAttachedRolePolicies`: Prevents listing managed policies
+
+### Implementation Recommendations
+
+1. **Apply to Support Roles**: Attach this deny policy to all tiered support and operational roles that don't need to manage IAM
+2. **Customize Resource Patterns**: Update the resource ARN patterns to match your custom role names
+3. **Exclude Administrative Roles**: Do NOT apply this policy to roles that legitimately need to manage IAM (security admins, IAM admins)
+4. **Test Thoroughly**: Verify the policy doesn't block legitimate operations before deploying to production
+5. **Document Exceptions**: Clearly document which roles are exempt from this policy and why
+6. **Use with StackSets**: Deploy this policy organization-wide using CloudFormation StackSets
+
+### Additional Security Controls
+
+**CloudTrail Monitoring**:
+- Enable CloudTrail in all accounts
+- Set up CloudWatch alarms for unusual role assumption patterns
+- Monitor for failed AssumeRole attempts
+- Alert on role assumption from unexpected IP addresses
+
+**Service Control Policies (SCPs)**:
+- Use SCPs to enforce External ID requirements at the organization level
+- Restrict role creation to approved patterns
+- Prevent modification of critical security roles
+
+**Regular Access Reviews**:
+- Quarterly review of who has access to view IAM roles
+- Annual review of all External IDs and role configurations
+- Audit role assumption patterns for anomalies
+- Review and update role permissions based on least privilege
+
+**Least Privilege Permissions**:
+- Start with ReadOnlyAccess and add permissions as needed
+- Avoid AdministratorAccess unless absolutely required
+- Use PowerUserAccess or SystemAdministrator for operational needs
+- Regularly review and remove unused permissions
+
+**Network Controls** (for highly sensitive environments):
+- Add IP-based conditions to role trust policies
+- Restrict role assumptions to known IP ranges
+- Use VPC endpoints for API calls
+- Implement time-based access controls
+
+### Security Checklist
+
+Use this checklist when deploying access roles:
+
+- [ ] Changed default role name to custom value
+- [ ] Generated cryptographically secure External ID (32+ characters)
+- [ ] Stored External ID in secure password manager or secrets system
+- [ ] Configured External ID in CloudFormation template
+- [ ] Verified External ID is not committed to version control
+- [ ] Applied deny policy to prevent role inspection by non-admin roles
+- [ ] Enabled CloudTrail logging in all accounts
+- [ ] Set up CloudWatch alarms for unusual role assumptions
+- [ ] Documented role naming convention securely
+- [ ] Scheduled External ID rotation (quarterly/annually)
+- [ ] Reviewed and minimized permissions (least privilege)
+- [ ] Tested role assumption with correct External ID
+- [ ] Verified deny policy doesn't block legitimate operations
+- [ ] Documented which roles are exempt from inspection restrictions
 

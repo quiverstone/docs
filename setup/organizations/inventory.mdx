@@ -26,10 +26,19 @@ Direct inventory access is the most common deployment method where Quiverstone d
 
   <Step title="Configure Essential Parameters">
     **Role Name** (`pRoleName`): Name for the inventory role (Default: QuiverstoneDirectOrgInventory)
+    
+    <Warning>
+    **Security Best Practice**: Change the default role name to a custom value unique to your organization. Using default role names makes it easier for unauthorized parties to discover and potentially target your roles.
+    </Warning>
 
-    **External ID** (`pExternalId`): Security token for role assumption (strongly recommended)
+    **External ID** (`pExternalId`): Security token for role assumption
+    
+    <Warning>
+    **Required for Production**: Always configure an External ID for production deployments. This prevents confused deputy attacks and unauthorized role assumptions.
     - Generate a unique random string (minimum 32 characters)
     - Store securely - you'll need this when configuring Quiverstone
+    - Never share or commit External IDs to version control
+    </Warning>
   </Step>
 
   <Step title="Create Stack">
@@ -67,9 +76,12 @@ Chained inventory requires two deployments: first the intermediate role, then th
 
     **Essential Parameters:**
     - **Role Name** (`pIntermediateRoleName`): Default is QuiverstoneTrustedIntermediate
+      <Warning>Change this to a custom role name for enhanced security</Warning>
     - **External ID** (`pExternalId`): Generate unique random string (minimum 32 characters)
+      <Warning>Required for production - never use default or empty values</Warning>
     - **Assume Role Scope** (`pAssumeRoleScope`): Use `specific-role-any-account` (recommended)
     - **Destination Role Name** (`pDestinationRoleName`): QuiverstoneChainedOrgInventory
+      <Warning>Change this to match your custom destination role name</Warning>
 
     <Note>
     If you already have an intermediate role deployed, you can reuse it. Skip to Step 2.
@@ -85,9 +97,12 @@ Chained inventory requires two deployments: first the intermediate role, then th
 
     **Essential Parameters:**
     - **Role Name** (`pChainedOrgInventoryRoleName`): Default is QuiverstoneChainedOrgInventory
+      <Warning>Change this to a custom role name for enhanced security</Warning>
     - **External ID** (`pExternalId`): Generate unique random string (can be different from intermediate)
+      <Warning>Required for production - use a different value than the intermediate role External ID</Warning>
     - **Intermediate Account ID** (`pIntermediateAccountId`): Account ID where intermediate role is deployed
     - **Intermediate Role Name** (`pIntermediateRoleName`): Name of intermediate role (default: QuiverstoneTrustedIntermediate)
+      <Warning>Update this if you changed the intermediate role name</Warning>
     - **Trust Principals** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
 
     Copy the chained inventory role ARN from the stack outputs.

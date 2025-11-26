@@ -42,16 +42,18 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
 - **pRoleName** (String, Default: `QuiverstoneDirectOrgInventory`)
   - Name for the direct organization inventory role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
 - **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+- **pExternalId** (String, Required for Production, Max: 1224 characters)
   - Security token for role assumption
-  - Strongly recommended for production environments
+  - **Required for production environments** - prevents confused deputy attacks
   - Generate a unique random string (minimum 32 characters)
   - Store securely - required when configuring Quiverstone
+  - Never share or commit External IDs to version control
 
 **Outputs**:
 
@@ -92,11 +94,14 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
 - **pInventoryRoleName** (String, Default: `QuiverstoneChainedOrgInventory`)
   - Name for the destination organization inventory role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
-- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+- **pExternalId** (String, Required for Production, Max: 1224 characters)
   - External ID for role assumption
   - Can be different from intermediate role External ID
-  - Recommended for enhanced security
+  - **Required for production** - use a different value than the intermediate role External ID
+  - Generate a unique random string (minimum 32 characters)
+  - Never share or commit External IDs to version control
 
 - **pIntermediateAccountId** (String, Required)
   - AWS Account ID that serves as the intermediate hop for role chaining
@@ -161,16 +166,18 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
 - **pRoleName** (String, Default: `QuiverstoneStandaloneAccountInventory`)
   - Name for the standalone account inventory role
   - Must be unique within the account
+  - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
 - **pQuiverstoneProductionAccountId** (String, Default: `684035162433`)
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Optional but Recommended, Max: 1224 characters)
+- **pExternalId** (String, Required for Production, Max: 1224 characters)
   - Security token for role assumption
-  - Strongly recommended for production environments
+  - **Required for production environments** - prevents confused deputy attacks
   - Generate a unique random string (minimum 32 characters)
   - Store securely - required when configuring Quiverstone
+  - Never share or commit External IDs to version control
 
 **Outputs**:
 
