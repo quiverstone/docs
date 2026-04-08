@@ -101,14 +101,10 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
 
 - **pExternalId** (String, Required for Production, Max: 1224 characters)
   - Security token for role assumption
-  - **Required for production environments** - prevents confused deputy attacks
+  - **Required for production environments** — prevents confused deputy attacks
   - Generate a unique random string (minimum 32 characters)
-  - Store securely - required when configuring Quiverstone
+  - Store securely — required when configuring Quiverstone
   - Never share or commit External IDs to version control
-  - Security token for role assumption
-  - Strongly recommended for production environments
-  - Generate a unique random string (minimum 32 characters)
-  - Store securely - required when configuring Quiverstone
 
 - **Permission Flags** (yes/no for each):
   - Same permission options as browser access role (see above)
@@ -136,7 +132,7 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
 
 **Deploy To**: Target account home region (e.g., us-east-1)
 
-**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate-reference))
+**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate))
 
 **Launch Template**:
 

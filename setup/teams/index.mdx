@@ -1,92 +1,155 @@
 ---
-title: Teams
-description: Collaborative teams for account management
+title: "Teams"
+description: "Organize users into ACCESS and SETTINGS teams to separate admins from consumers"
 ---
 
-# Teams
+Teams are the primary unit of user organization in a Quiverstone subscription. Every team has a type (`ACCESS` or `SETTINGS`) that determines what its members can do, and every team member has a role (`OWNER`, `ADMIN`, or `MEMBER`) that determines how they can manage the team itself.
+
+This page explains the model, walks through creating and managing teams, and covers how invites, co-ownership, and backfill work.
 
 <Note>
-**Status:** In Development - This feature is currently under development and will be available in a future release.
+Teams require a paid subscription. Free tier is a single-user workspace with no teams. See [Subscriptions & Tiers](/subscriptions) for the full feature gating.
 </Note>
 
-## Overview
+## The two team types
 
-Teams in Quiverstone will provide a higher-level organization structure for collaborative account management. Teams combine users, groups, and permissions into cohesive units for managing AWS accounts.
+Quiverstone separates users into two distinct roles by team type, so that the people who *manage* your AWS inventory are cleanly separated from the people who *consume* it.
 
-## Planned Features
+### `ACCESS` teams
 
-### Team Structure
-- Create multi-user teams
-- Add groups to teams
-- Assign team leads and members
-- Define team hierarchies
+`ACCESS` teams are for **consumers** — people who need to view Organizations, Accounts, and Customers, and assume AWS roles, but should not be able to modify the workspace inventory.
 
-### Team-Based Access
-- Grant teams access to organizations
-- Assign teams to customer accounts
-- Apply team-level role permissions
-- Inherit permissions from organization assignments
+- Available on: **Consultant**, **Pro**, **Enterprise**.
+- Members cannot create, edit, or delete Organizations, Accounts, or Customers. The CRUD controls are hidden in the UI.
+- Members **can** assume any AWS IAM role that has been granted to them via a [Group](/setup/groups).
+- On Consultant tier, the single `ACCESS` team automatically sees every resource the owner creates.
+- On Pro and Enterprise, `ACCESS` teams see only the resources explicitly granted to them through a Group.
 
-### Team Collaboration
-- Shared dashboards and views
-- Team activity feeds
-- Collaborative troubleshooting
-- Team-based notifications
+### `SETTINGS` teams
 
-## Planned Team Types
+`SETTINGS` teams are for **admins** — the people who own and manage the workspace's Organizations, Accounts, Customers, Roles, and Groups.
 
-**Customer Service Teams**
-- Dedicated to specific customers
-- Access to customer organizations and accounts
-- Team-specific role configurations
+- Available on: **Pro**, **Enterprise**. Not available on Consultant.
+- Members can create, edit, and delete Organizations, Accounts, Customers, Roles, and Groups.
+- **Automatic co-ownership:** when any `SETTINGS` member creates a resource, every other current `SETTINGS` member immediately becomes a co-owner with full edit and delete rights. There is no manual sharing step.
+- A `SETTINGS` team `OWNER` can manage *any* team in the subscription, not just their own.
+- `SETTINGS` members are the only people who can create and edit [Groups](/setup/groups) to share resources with `ACCESS` teams.
 
-**Project Teams**
-- Temporary teams for specific projects
-- Time-limited access grants
-- Project completion workflows
+<Warning>
+Automatic co-ownership applies to `SETTINGS` teams only. If two `SETTINGS` members both work on the same Organization, either can edit or delete it at any time. Treat the `SETTINGS` team as a trusted circle of admins.
+</Warning>
 
-**On-Call Teams**
-- Rotating team membership
-- Emergency access permissions
-- Escalation workflows
+## Team roles: `OWNER`, `ADMIN`, `MEMBER`
 
-**Service Delivery Teams**
-- Organized by service offering (Migration, Security, Optimization)
-- Service-specific access patterns
-- Cross-customer access based on service type
+Within a team, each member has exactly one of three roles. Team roles control how you manage the team itself — they are independent of the team type.
 
-## Use Cases
+| Role | Who it is | What they can do |
+|---|---|---|
+| `OWNER` | The subscription payer, or someone they transferred ownership to | Full control of the team: edit details, invite and remove members, promote or demote members, delete the team. |
+| `ADMIN` | A trusted lieutenant | Manage team membership: edit team details, invite new members, promote members up to `ADMIN`. Cannot delete the team or demote an `OWNER`. |
+| `MEMBER` | A regular team member | Use the resources the team grants. Cannot manage team membership. |
 
-**For MSPs:**
-- Create customer-dedicated service teams
-- Organize staff by specialization (AWS, Security, Networking)
-- Manage contractor and employee access separately
-- Implement follow-the-sun support with regional teams
+<Note>
+On Consultant tier, non-owners are locked to `MEMBER`. The `OWNER`/`ADMIN`/`MEMBER` distinction only matters on Pro and Enterprise.
+</Note>
 
-**For Enterprises:**
-- Create business unit teams
-- Organize by application or service ownership
-- Implement platform team structures
-- Support matrix organization models
+A team must always have at least one `OWNER`. Quiverstone prevents you from demoting or removing the last remaining `OWNER` of a team — promote someone else first.
 
-**For Consulting Firms:**
-- Create engagement-based teams
-- Manage consultant assignments to customers
-- Time-limited access for project duration
-- Knowledge transfer and handoff workflows
+## Creating a team
 
-## Integration Plans
+<Steps>
+  <Step title="Open the Teams page">
+    Navigate to **Teams** in the main navigation.
+  </Step>
 
-- **Communication Tools** - Slack, Microsoft Teams integration
-- **Project Management** - JIRA, ServiceNow integration
-- **Incident Management** - PagerDuty, Opsgenie integration
-- **Calendar Integration** - Team schedules and on-call rotations
+  <Step title="Click Create Team">
+    The button is only available if your tier allows additional teams. On Consultant, the button is hidden once the single allowed team exists.
+  </Step>
 
-## Coming Soon
+  <Step title="Pick a team type">
+    Choose `ACCESS` or `SETTINGS`. The `SETTINGS` option is hidden on Consultant tier.
 
-This feature is being actively developed. Documentation will be updated as the feature becomes available.
+    <Note>
+    If you are not sure, start with `ACCESS`. You can always create additional teams later.
+    </Note>
+  </Step>
 
-For current collaboration, use:
-- Customer associations
-- Organization access lists
-- Account access controls
+  <Step title="Name the team and save">
+    Give the team a short, descriptive name (for example, `Ops`, `Platform Admins`, `Acme Contractors`). You'll use this name when referencing the team in [Groups](/setup/groups).
+  </Step>
+</Steps>
+
+## Inviting a member
+
+<Steps>
+  <Step title="Open the team">
+    Click into the team from the **Teams** list.
+  </Step>
+
+  <Step title="Click Invite Member">
+    Enter the invitee's email address. They don't need a Quiverstone account yet — the invite flow will create one when they accept.
+  </Step>
+
+  <Step title="Wait for them to accept">
+    The invitee receives an email invitation. Their membership sits in `PENDING` state until they accept and sign in for the first time, at which point it becomes `ACTIVE`.
+  </Step>
+
+  <Step title="Verify backfill">
+    When the new member's status transitions to `ACTIVE`, Quiverstone automatically backfills resource visibility so they can start working immediately. See [Backfill behavior](#backfill-behavior) below for the exact rules.
+  </Step>
+</Steps>
+
+## Backfill behavior
+
+When a new member becomes active, Quiverstone grants them visibility into the resources they should already be able to see — no manual sharing step required.
+
+| Team type | Tier | What the new member sees on activation |
+|---|---|---|
+| `ACCESS` | Consultant | Every Organization, Account, and Customer the team owner has ever created. |
+| `ACCESS` | Pro / Enterprise | Nothing automatic. They see only the resources referenced by Groups that include them or their team. Edit or re-save an existing Group to grant access. |
+| `SETTINGS` | Pro / Enterprise | Automatic co-ownership of every resource any current `SETTINGS` teammate owns. |
+
+<Note>
+Pro/Enterprise `ACCESS` team backfill is the one case that requires action: after adding a new member, have a `SETTINGS` team member confirm that any Group the new member should be part of already references them (directly or via their team).
+</Note>
+
+## Managing members
+
+From the team detail page, a team `OWNER` or `ADMIN` can:
+
+- **Change a member's role** — promote a `MEMBER` to `ADMIN`, or an `ADMIN` to `OWNER` (Pro/Enterprise only).
+- **Remove a member** — revokes the team's grants from that user immediately. If the user is in multiple teams or Groups, their other access is unaffected.
+- **Resend an invite** if a `PENDING` invite has expired.
+- **Delete the team** (Pro/Enterprise only, `OWNER` only) — removes the team and revokes any access it was granting through Groups.
+
+## Transferring ownership
+
+A team `OWNER` can transfer ownership to another member:
+
+1. Promote the target member to `OWNER`.
+2. Once the team has two `OWNER`s, demote yourself to `ADMIN` or `MEMBER`.
+
+This two-step process is intentional: it ensures the team never has zero owners at any point.
+
+For transferring ownership of the *entire subscription* (billing, seats, tier management), contact support — subscription ownership transfer is a privileged operation performed out-of-band.
+
+## Common scenarios
+
+**"I have a small team that should all see the same AWS estate."**
+Consultant tier, one `ACCESS` team, invite everyone into it. Done.
+
+**"I want to separate my admins from my operators."**
+Pro tier. Create a `SETTINGS` team for yourself and any other admins, then create one or more `ACCESS` teams for operators. Use [Groups](/setup/groups) to share specific Organizations or Accounts with the `ACCESS` teams.
+
+**"I want a contractor to see only one Customer's infrastructure."**
+Pro or Enterprise. Create an `ACCESS` team for the contractor, then create a Group that includes that team and only the Organizations, Accounts, and Customer records they should see. Delete the Group when the engagement ends to revoke access.
+
+**"I want a second admin who can manage the workspace alongside me."**
+Pro or Enterprise. Add them to your `SETTINGS` team. They'll automatically co-own every record you've created, and every record they create will be co-owned by you.
+
+## Related pages
+
+- [Subscriptions & Tiers](/subscriptions)
+- [Groups](/setup/groups)
+- [Users](/setup/users)
+- [Capability reference](/subscriptions/capabilities)

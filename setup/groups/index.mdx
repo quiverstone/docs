@@ -1,62 +1,170 @@
 ---
-title: Groups
-description: Organize users into groups for collaborative access
+title: "Groups"
+description: "Share Organizations, Accounts, and Customers with ACCESS teams on Pro and Enterprise"
 ---
 
-# Groups
+Groups are the mechanism Pro and Enterprise subscriptions use to share Organizations, Accounts, and Customers with `ACCESS` teams. A Group answers a single question:
+
+> **"Which users should have which AWS roles on which resources?"**
+
+This page explains what a Group contains, how it grants access, and how to use Groups to model common sharing patterns.
 
 <Note>
-**Status:** In Development - This feature is currently under development and will be available in a future release.
+Groups do not exist on Free or Consultant tiers. Free is single-user; Consultant shares everything automatically. If you need granular, selective sharing, you're on Pro or Enterprise — which is exactly where Groups live.
 </Note>
 
-## Overview
+## The mental model
 
-Groups in Quiverstone will enable you to organize users into logical collections for easier access management. Instead of assigning permissions to individual users, you can assign them to groups.
+In Quiverstone, an `ACCESS` team member sees **nothing** by default. They only see Organizations, Accounts, and Customers that a `SETTINGS` team member has explicitly shared with them through a Group.
 
-## Planned Features
+A Group is a named bundle that links three things together:
 
-### Group Management
-- Create and manage user groups
-- Add/remove users from groups
-- Nest groups within other groups
-- Sync groups from identity providers
+1. **Who** — one or more individual users, and/or one or more `ACCESS` teams.
+2. **What** — one or more Organizations, Accounts, or Customers they should be able to see.
+3. **How** — one or more [Roles](/setup/roles) (saved AWS IAM role configurations) they can assume on the linked Accounts.
 
-### Group-Based Access
-- Assign groups to organizations
-- Grant groups access to specific accounts
-- Apply role permissions to groups
-- Inherit permissions from parent groups
+When a user is added to a Group (directly or via one of their teams), they immediately gain read-only visibility into the listed resources and the ability to assume the Group's attached Roles on those resources.
 
-### Group Types
-- **Department Groups** - Organize by business department
-- **Customer Groups** - Group users by customer assignment
-- **Project Groups** - Temporary groups for project work
-- **Service Groups** - Groups for specific service offerings
+## What a Group contains
 
-## Use Cases
+| Field | Description |
+|---|---|
+| **Name** | Short, descriptive identifier (e.g. `Prod-ReadOnly`, `Acme-Contractors`). |
+| **Description** | Optional longer explanation of why the Group exists. |
+| **Users** | Specific individual users granted access directly. |
+| **Teams** | `ACCESS` teams whose active members inherit the Group's access transitively. |
+| **Roles** | One or more saved [Role](/setup/roles) records the Group's members can assume on the linked Accounts. |
+| **Organizations / Accounts / Customers** | The resources whose visibility is being granted. |
 
-**For MSPs:**
-- Create groups per customer for customer-dedicated teams
-- Organize staff by service line (Cloud, Security, DevOps)
-- Grant access to customer organizations by group membership
+## What a Group grants
 
-**For Enterprises:**
-- Organize by department (Engineering, Finance, Operations)
-- Create project-based temporary groups
-- Implement org-chart-based access hierarchy
+Adding a user to a Group (directly or via their team) gives them:
 
-**For Platform Teams:**
-- Group by function (DevOps, SRE, Platform Engineering)
-- Create on-call groups with rotating membership
-- Separate production and non-production access groups
+- **Read-only visibility** of every Organization, Account, and Customer referenced by the Group. The records appear in the user's list views and they can click through to see details.
+- **Role assumption** into any Account referenced by the Group, using any Role attached to the Group. The user clicks **Assume Role** on the Account and Quiverstone issues temporary AWS credentials.
+- **Nothing else.** Users in a Group cannot edit or delete the referenced resources — CRUD remains locked to `SETTINGS` team members.
 
-## Integration Plans
+<Warning>
+Group membership grants visibility and role assumption only. It never grants the ability to modify the workspace inventory. To give someone edit rights, add them to a `SETTINGS` team instead.
+</Warning>
 
-- **Identity Provider Sync** - Import groups from Azure AD, Okta, Google Workspace
-- **SCIM Support** - Automatic group provisioning and deprovisioning
-- **Audit Logging** - Track group membership changes
-- **Access Reviews** - Periodic review of group access rights
+## Creating a Group
 
-## Coming Soon
+<Steps>
+  <Step title="Confirm you're on a SETTINGS team">
+    Only `SETTINGS` team members can create Groups. If the **Groups** navigation item is hidden, you are not on a `SETTINGS` team — ask your workspace admin to add you to one, or have them create the Group for you.
+  </Step>
 
-This feature is being actively developed. Documentation will be updated as the feature becomes available.
+  <Step title="Open Groups and click Create Group">
+    Navigate to **Groups** and click **Create Group**.
+  </Step>
+
+  <Step title="Give the Group a name and description">
+    Use a name that describes the access being granted, not the people receiving it. `Prod-ReadOnly` ages better than `Carols-Access`.
+  </Step>
+
+  <Step title="Add Users and Teams">
+    Pick individual users, `ACCESS` teams, or both. Adding a team is usually cleaner — it means new team members automatically inherit the Group's access when they join the team, with no extra steps.
+  </Step>
+
+  <Step title="Attach Roles">
+    Select one or more [Role](/setup/roles) records. These are the AWS IAM roles that Group members will be able to assume on the linked Accounts.
+  </Step>
+
+  <Step title="Attach Organizations, Accounts, and Customers">
+    Pick the resources to share. You can mix and match — for example, one Customer record plus two specific Accounts plus an entire Organization.
+  </Step>
+
+  <Step title="Save">
+    The Group takes effect immediately. Any user in the Group (directly or via a team) will see the linked resources on their next list refresh.
+  </Step>
+</Steps>
+
+## How Groups interact
+
+Several Group behaviors are worth internalizing before you start building them out.
+
+### Groups are additive
+
+A user can be in multiple Groups. Their visible resources are the **union** of every Group they belong to. There is no way to "subtract" access with a Group — to remove access, edit or delete the Group that grants it.
+
+### Team membership propagates live
+
+If you add a Group to a team, every current and future active member of that team inherits the Group's access. Conversely, removing a member from the team revokes the access the Group was giving them (unless another Group grants the same access independently).
+
+### Changes take effect on the next list refresh
+
+Edits to a Group — adding a user, removing a resource, attaching a new Role — propagate immediately. Affected users see the change the next time their list views refresh; no sign-out or cache bust is required.
+
+### Deleting a Group revokes its grants
+
+When you delete a Group, every access it was granting disappears — unless another Group still grants the same combination of user and resource. Deletion is the revocation mechanism for time-bounded access (see the recipe below).
+
+### Only `SETTINGS` members can manage Groups
+
+- Any `SETTINGS` team member can create a Group.
+- Any `SETTINGS` team `OWNER` can edit or delete any Group in the subscription.
+- Other `SETTINGS` members can edit or delete only the Groups they created.
+
+## Recipes
+
+### "Give my Ops team read-only access to our Prod Organization"
+
+1. Create an `ACCESS` team called `Ops` and invite the operators.
+2. Create a Role called `ProdReadOnly` pointing at your deployed read-only IAM role.
+3. Create a Group called `Prod-ReadOnly` with:
+   - **Teams:** `Ops`
+   - **Roles:** `ProdReadOnly`
+   - **Organizations:** `AcmeProd` (or whichever Organization record represents Prod)
+4. Every member of `Ops` can now see the Prod Organization and assume `ProdReadOnly` into any of its member accounts.
+
+### "Give a contractor access to one Account for a 30-day engagement"
+
+<Warning>
+Quiverstone does not currently support time-bounded Group membership. Groups do not expire on their own. The revocation story is manual: delete the Group (or remove the contractor from it) when the engagement ends.
+</Warning>
+
+1. Create an `ACCESS` team called `Acme-Contractors` and invite the contractor.
+2. Create a Group called `Acme-Contractor-Access` with:
+   - **Teams:** `Acme-Contractors`
+   - **Roles:** the specific IAM role the contractor should use
+   - **Accounts:** the single Account they need access to
+3. Put the end date in the Group description so you remember to clean it up.
+4. On the end date, delete the Group (or remove the contractor from the team). Access disappears immediately.
+
+### "Give different teams different permission levels on the same Accounts"
+
+Create two Groups referencing the same Accounts, one per team, each attaching a different Role. Members of each team see the same Accounts but can only assume the Role attached to their Group.
+
+## Troubleshooting
+
+**A user I added to a Group can't see the resource.**
+Check, in order:
+
+1. Is the user's team membership status `ACTIVE`? A `PENDING` invite does not trigger backfill.
+2. Are they on the same subscription as the Group? Groups cannot cross subscriptions.
+3. Is the subscription on Pro or Enterprise? Free and Consultant do not use Groups.
+4. Has the user refreshed their list view since the Group was saved?
+5. Is the resource still attached to the Group? It may have been removed.
+
+**The user sees the resource but cannot assume any role on it.**
+The Group grants visibility separately from role assumption. Verify that at least one Role is attached to the Group, and that the Role's IAM configuration is valid (correct ARN, External ID, etc.).
+
+**An `ACCESS` team member can see an Account but gets an error when they click Assume Role.**
+This is usually an AWS-side issue rather than a Quiverstone permission issue. Check the [Access Roles Reference](/setup/iam-roles/access) troubleshooting section.
+
+## What Groups do *not* do
+
+To avoid surprises, these behaviors are explicitly not supported today:
+
+- **No time-bounded membership.** Groups don't expire. Delete them to revoke access.
+- **No per-field permissions.** Access is at the record level — you cannot hide specific Account fields from a user who can see the Account.
+- **No Role assignment outside Groups.** You cannot attach a Role directly to a user; it must go through a Group.
+- **No cross-subscription sharing.** A Group cannot include users from a different Quiverstone subscription.
+
+## Related pages
+
+- [Subscriptions & Tiers](/subscriptions)
+- [Teams](/setup/teams)
+- [Roles](/setup/roles)
+- [Capability reference](/subscriptions/capabilities)

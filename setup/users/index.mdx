@@ -1,14 +1,112 @@
 ---
-title: Users
-description: User management and configuration
+title: "Users"
+description: "Invite people into your Quiverstone workspace and manage their access"
 ---
 
-# Users
+A **user** in Quiverstone is any individual with a login to your workspace. Users don't exist in isolation — they get their access by being added to a [Team](/setup/teams), and (on Pro and Enterprise) to one or more [Groups](/setup/groups).
+
+This page covers how to invite users, how membership status works, and how to remove someone cleanly when they leave.
 
 <Note>
-**Status:** In Development - This feature is currently under development and will be available in a future release.
+Users are always scoped to a single subscription. There is no concept of a user being "shared" across multiple Quiverstone workspaces — each workspace has its own user list and its own invites.
 </Note>
 
-## Overview
+## How users get access
 
-Users in Quiverstone will provide fine-grained access control for managing accounts and organizations.
+Quiverstone uses a layered model. A user's effective access is the union of what each of these grants:
+
+1. **Team membership.** Adding a user to a team determines what *kind* of access they have — `ACCESS` (consumer) or `SETTINGS` (admin) — and their role within that team (`OWNER`, `ADMIN`, `MEMBER`).
+2. **Group membership (Pro/Enterprise only).** Adding a user (or one of their teams) to a Group determines *which* Organizations, Accounts, and Customers they see, and which AWS Roles they can assume.
+3. **Tier-driven capabilities.** The subscription tier gates which team types and team roles are available at all.
+
+If you want a user to see a specific Account, the question is almost always: *"Which Group should reference them?"* not *"Which permission should I toggle on the user?"*
+
+## Membership status
+
+Every team membership in Quiverstone has a status field. Understanding it helps when troubleshooting missing access.
+
+| Status | Meaning |
+|---|---|
+| `PENDING` | The user has been invited but has not yet accepted. They appear in the team list but have no access. Backfill has not run. |
+| `ACTIVE` | The user has accepted the invite and signed in. Full team and Group access is in effect. |
+| `REVOKED` | The user was removed from the team. Any access granted through that team (including via Groups that referenced the team) is gone. |
+
+Backfill of existing resources only runs when a user's status transitions from `PENDING` to `ACTIVE`. If you add a user to a new Group *before* they accept their invite, they will see the Group's resources the moment they activate.
+
+## Inviting a user
+
+The invite flow is the same regardless of team type, but who can send invites varies by tier.
+
+<Steps>
+  <Step title="Decide which team they should join">
+    Pick the team that matches how they'll use the workspace. Admins go into a `SETTINGS` team (Pro/Enterprise); consumers go into an `ACCESS` team.
+
+    If you don't have a suitable team yet, [create one](/setup/teams) first.
+  </Step>
+
+  <Step title="Open the team and click Invite Member">
+    Navigate to **Teams**, click into the target team, and click **Invite Member**.
+  </Step>
+
+  <Step title="Enter the invitee's email">
+    The invitee does not need an existing Quiverstone account. The invite flow creates one when they accept.
+  </Step>
+
+  <Step title="Pre-stage their Group access (Pro/Enterprise ACCESS teams)">
+    If you're inviting someone to an `ACCESS` team on Pro or Enterprise, add their team to any [Groups](/setup/groups) they should have access to *now*, so that backfill happens automatically when they activate.
+
+    <Note>
+    This step is not needed for Consultant tier (everything is shared automatically) or for `SETTINGS` team invites (automatic co-ownership handles it).
+    </Note>
+  </Step>
+
+  <Step title="Wait for them to accept">
+    The user receives an email invite, accepts, and signs in. Their status flips from `PENDING` to `ACTIVE` and backfill runs according to the rules in the [Teams page](/setup/teams#backfill-behavior).
+  </Step>
+</Steps>
+
+## Who can invite users
+
+| Tier | Who can invite |
+|---|---|
+| Free | No one (single-user tier) |
+| Consultant | The team `OWNER` only |
+| Pro / Enterprise | Any `SETTINGS` team member, and any team `OWNER`/`ADMIN` within their own team |
+
+See the [Capability reference](/subscriptions/capabilities) for the full matrix.
+
+## Removing a user
+
+Removing a user is done from the team page. Pick the team the user belongs to and use the **Remove** action on their row.
+
+**What happens on removal:**
+
+- Team grants (including automatic co-ownership on `SETTINGS` teams) are revoked immediately.
+- Any Group access the user inherited via that team is revoked — unless another Group or team still grants the same access.
+- Records the user personally owned on Free tier or created as the Consultant `OWNER` are not deleted. They remain on the subscription under the subscription owner's control.
+- CloudTrail records of past role assumptions are preserved — removal is not retroactive.
+
+<Warning>
+If a user is in multiple teams, removing them from one team does not remove them from the others. To fully revoke someone's access, remove them from every team they belong to.
+</Warning>
+
+## Common scenarios
+
+**"A new hire needs the same access as the rest of the Ops team."**
+Add them to the Ops `ACCESS` team. Any Groups that reference the team will automatically include them when their status becomes `ACTIVE`.
+
+**"I invited someone yesterday but they can't see anything."**
+Check their membership status. If it's still `PENDING`, they haven't accepted the invite yet. If it's `ACTIVE` but they still can't see resources, confirm (on Pro/Enterprise) that they're in a Group that references the resources — `ACCESS` team members see nothing by default.
+
+**"A contractor finished their engagement."**
+Remove them from the contractor team they were in. Access disappears immediately. If the team was only created for that engagement, delete the team too — and delete any Groups that existed solely to reference that team.
+
+**"Someone is leaving the company but I want to preserve what they built."**
+On Pro/Enterprise, records in a `SETTINGS` team are already co-owned by everyone else on the team, so removing the leaver does not lose any records. On Consultant or Free, there is only one owner, so you may need to have them transfer ownership of the subscription before removing their account.
+
+## Related pages
+
+- [Teams](/setup/teams)
+- [Groups](/setup/groups)
+- [Subscriptions & Tiers](/subscriptions)
+- [Capability reference](/subscriptions/capabilities)

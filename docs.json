@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Quiverstone Documentation",
-  "ignore": [".trunk/**/*", "roles/**/*.yaml", "roles/**/*.yml", "roles/**/*.json", "roles/.git*", "roles/.github/**/*"],
+  "ignore": [".trunk/**/*", "_reference/**/*", "roles/**/*.yaml", "roles/**/*.yml", "roles/**/*.json", "roles/.git*", "roles/.github/**/*"],
   "colors": {
     "primary": "#30CABE",
     "light": "#30CABE",
@@ -14,7 +14,7 @@
   },
   "integrations": {
     "ga4": {
-        "measurementId": "GT-KT42K32V"
+      "measurementId": "GT-KT42K32V"
     }
   },
   "navigation": {
@@ -24,10 +24,29 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["quiverstone"]
+            "pages": [
+              "quiverstone"
+            ]
           },
           {
-            "group": "Setup",
+            "group": "Subscriptions",
+            "pages": [
+              "subscriptions/index",
+              "subscriptions/consultant-quickstart",
+              "subscriptions/capabilities"
+            ]
+          },
+          {
+            "group": "Workspace",
+            "pages": [
+              "setup/users/index",
+              "setup/teams/index",
+              "setup/groups/index",
+              "setup/roles/index"
+            ]
+          },
+          {
+            "group": "AWS Setup",
             "pages": [
               {
                 "group": "Organizations",
@@ -35,13 +54,15 @@
                   "setup/organizations/index",
                   "setup/organizations/inventory"
                 ]
-              },{
+              },
+              {
                 "group": "Accounts",
                 "pages": [
                   "setup/accounts/index",
                   "setup/accounts/access"
                 ]
-              },{
+              },
+              {
                 "group": "IAM Roles",
                 "pages": [
                   "setup/iam-roles/index",
@@ -49,18 +70,17 @@
                   "setup/iam-roles/inventory",
                   "setup/iam-roles/intermediate"
                 ]
-              },{
+              },
+              {
+                "group": "Service Catalog",
+                "pages": [
+                  "setup/service-catalog/index"
+                ]
+              },
+              {
                 "group": "Customers",
                 "pages": [
-                  "setup/customers"
-                ]
-              },{
-                "group": "Access Management",
-                "pages": [
-                  "setup/users",
-                  "setup/roles",
-                  "setup/groups",
-                  "setup/teams"
+                  "setup/customers/index"
                 ]
               }
             ]
@@ -80,7 +100,9 @@
         "groups": [
           {
             "group": "API Documentation",
-            "pages": ["api"]
+            "pages": [
+              "api"
+            ]
           }
         ]
       },
@@ -89,7 +111,9 @@
         "groups": [
           {
             "group": "Integrations",
-            "pages": ["integrations"]
+            "pages": [
+              "integrations"
+            ]
           }
         ]
       }

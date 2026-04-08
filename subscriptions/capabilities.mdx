@@ -1,0 +1,103 @@
+---
+title: "Capability Reference"
+description: "Who can do what in Quiverstone, by subscription tier, team type, and team role"
+---
+
+This page is the single source of truth for every permission-gated action in Quiverstone. If you hit an error like "You don't have permission to do that," check here first — the combination of your **subscription tier**, **team type**, and **team role** determines what you can do.
+
+<Note>
+Permissions are evaluated at request time. Upgrading a subscription or changing someone's team role takes effect immediately; no sign-out is required.
+</Note>
+
+## Terminology refresher
+
+- **Tier** — the subscription plan: `Free`, `Consultant`, `Pro`, or `Enterprise`. See [Subscriptions & Tiers](/subscriptions).
+- **Team type** — `ACCESS` (consumers) or `SETTINGS` (admins). See [Teams](/setup/teams).
+- **Team role** — `OWNER`, `ADMIN`, or `MEMBER`, assigned per team per user.
+
+Every user is either not on any team (Free), on the single Consultant team, or on one or more Pro/Enterprise teams.
+
+## Workspace & subscription
+
+| Action | Free | Consultant | Pro / Enterprise |
+|---|---|---|---|
+| Manage billing and upgrade the subscription | Owner | Owner | `SETTINGS` `OWNER` |
+| Invite new users | — | Owner | `SETTINGS` members; team `OWNER`/`ADMIN` within their own team |
+| Remove a user from a team | — | Owner | `SETTINGS` `OWNER`; team `OWNER`/`ADMIN` within their own team |
+| Transfer subscription ownership | Owner | Owner | `SETTINGS` `OWNER` |
+
+## Teams
+
+| Action | Free | Consultant | Pro / Enterprise |
+|---|---|---|---|
+| Create a team | — | — (fixed single team) | `SETTINGS` members |
+| Edit team details | — | Owner | Team `OWNER`/`ADMIN`; any `SETTINGS` `OWNER` |
+| Invite a team member | — | Owner | Team `OWNER`/`ADMIN`; any `SETTINGS` member |
+| Promote a member to `ADMIN` | — | — (locked to `MEMBER`) | Team `OWNER` |
+| Promote a member to `OWNER` | — | — | Current team `OWNER` |
+| Delete a team | — | — | Team `OWNER`; any `SETTINGS` `OWNER` |
+| Choose team type (`ACCESS` vs `SETTINGS`) at creation | — | — (locked to `ACCESS`) | `SETTINGS` members |
+
+<Note>
+A team must always have at least one `OWNER`. The system will refuse to demote or remove the last remaining `OWNER` of a team.
+</Note>
+
+## Organizations, Accounts, and Customers
+
+These three resource types share the same permission model.
+
+| Action | Free | Consultant | Pro / Enterprise |
+|---|---|---|---|
+| Create a record | Owner | Owner only | `SETTINGS` members only |
+| Edit or delete a record | Owner | Owner only | Any `SETTINGS` member (automatic co-ownership) |
+| View a record | Owner | Every team member (automatic) | Record owner + any `SETTINGS` member + any user explicitly added via a [Group](/setup/groups) |
+| Assume an AWS role on a linked Account | Owner | Every team member | Record owner + any `SETTINGS` member + any Group member whose Group attaches that Role |
+
+<Warning>
+On Pro and Enterprise, `ACCESS` team members see **nothing** until a `SETTINGS` member adds them (directly or via their team) to a Group that references the resource.
+</Warning>
+
+## Groups
+
+Groups only exist on Pro and Enterprise. Consultant tier shares everything automatically and does not expose the Groups UI.
+
+| Action | Free | Consultant | Pro / Enterprise |
+|---|---|---|---|
+| Create a Group | — | — | `SETTINGS` members |
+| Edit a Group | — | — | Group creator; any `SETTINGS` `OWNER` |
+| Delete a Group | — | — | Group creator; any `SETTINGS` `OWNER` |
+| Be referenced in a Group | — | — | Any user or `ACCESS` team in the subscription |
+
+See [Groups](/setup/groups) for the full model.
+
+## Roles (IAM role records)
+
+A Role in Quiverstone is a saved AWS IAM role configuration (ARN, External ID, session name, optional chain). Roles are attached to Groups — you cannot grant a Role directly to a user.
+
+| Action | Free | Consultant | Pro / Enterprise |
+|---|---|---|---|
+| Create a Role record | Owner | Owner | `SETTINGS` members |
+| Edit or delete a Role record | Owner | Owner | Any `SETTINGS` member |
+| Attach a Role to a Group | — | — | `SETTINGS` members |
+| Assume a Role into an AWS account | Owner | Every team member | Any user whose Group membership attaches that Role to a linked Account |
+
+## "Why can't I…?" quick index
+
+Use this table to jump straight to the likely cause of a permission error.
+
+| Error you're seeing | Likely cause | Fix |
+|---|---|---|
+| "You cannot create Organizations" | You're on Pro/Enterprise but not on a `SETTINGS` team. | Ask a `SETTINGS` team `OWNER` to add you to one. |
+| "You cannot create teams" on Consultant | Consultant tier is capped at one team. | [Upgrade to Pro](/subscriptions). |
+| "You cannot promote this member" on Consultant | Consultant tier locks non-owners to `MEMBER`. | [Upgrade to Pro](/subscriptions). |
+| "You cannot delete this Group" | Groups can only be deleted by their creator or a `SETTINGS` `OWNER`. | Have a `SETTINGS` `OWNER` delete it, or ask the creator. |
+| "This Account is not visible" as an `ACCESS` team member | No Group attaches that Account to you or your team. | Ask a `SETTINGS` member to add you to a Group that includes the Account. |
+| "Cannot demote the last OWNER" | Every team must have at least one `OWNER`. | Promote another member to `OWNER` first, then demote. |
+| "You cannot invite more members" | You have hit your tier's seat cap (3 on Consultant, 10 on Pro). | [Upgrade](/subscriptions) or remove an existing member. |
+
+## Related pages
+
+- [Subscriptions & Tiers](/subscriptions)
+- [Teams](/setup/teams)
+- [Groups](/setup/groups)
+- [Roles](/setup/roles)
