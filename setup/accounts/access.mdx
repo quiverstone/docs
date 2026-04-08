@@ -1,6 +1,6 @@
 ---
-title: Access
-description: Deploy Quiverstone access roles to AWS accounts for secure account access
+title: "Access Roles"
+description: "Deploy access roles so Quiverstone can securely operate inside your AWS Accounts"
 ---
 
 Access roles provide varying levels of permissions to AWS accounts, from read-only to full administrative access. Deploy these roles to enable Quiverstone to access and manage your AWS accounts.
@@ -15,7 +15,7 @@ Access roles provide varying levels of permissions to AWS accounts, from read-on
 
 ## Browser Session Deployment
 
-Browser Session is a deployment method where Quiverstone generated the AWS Console Switch Role link for your accounts..
+Browser Session is a deployment method where Quiverstone generates the AWS Console Switch Role link for your accounts.
 
 <Steps>
   <Step title="Launch CloudFormation Template">
@@ -58,7 +58,7 @@ Browser Session is a deployment method where Quiverstone generated the AWS Conso
 
 
 <Note>
-For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access).
 </Note>
 
 
@@ -123,7 +123,7 @@ Direct access is the simplest deployment method where Quiverstone directly assum
 
 
 <Note>
-For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access).
 </Note>
 
 ## Chained Access Deployment
@@ -193,12 +193,12 @@ Chained access requires two deployments: first the intermediate role, then the d
 </Steps>
 
 <Note>
-For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access).
 </Note>
 
-## Stand-Alone Account Inventory Deployment
+## Standalone Account Inventory Deployment
 
-Stand-Alone account inventory is a deployment method where Quiverstone can invnetory details about a single account
+Standalone account inventory is a deployment method where Quiverstone can inventory details about a single account that is not part of an AWS Organization.
 
 <Steps>
   <Step title="Launch CloudFormation Template">
@@ -224,7 +224,7 @@ Stand-Alone account inventory is a deployment method where Quiverstone can invne
 
 
 <Note>
-For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access-reference).
+For detailed deployment information including StackSets and all template variants, see the [Access Roles Reference](/setup/iam-roles/access).
 </Note>
 
 ## Next Steps
@@ -236,7 +236,7 @@ For detailed deployment information including StackSets and all template variant
 
 ## Comprehensive Reference
 
-For detailed information about all access role templates, deployment methods, security considerations, and troubleshooting, see the [Access Roles Reference Documentation](/setup/iam-roles/access-reference).
+For detailed information about all access role templates, deployment methods, security considerations, and troubleshooting, see the [Access Roles Reference](/setup/iam-roles/access).
 
 ## Security Recommendations
 

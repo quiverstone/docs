@@ -83,7 +83,7 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
 
 **Deploy To**: Management Account or Delegated Administrator Account home region (e.g., us-east-1)
 
-**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate-reference))
+**Prerequisites**: Intermediate role must be deployed first (see [Intermediate Roles Reference](/setup/iam-roles/intermediate))
 
 **Launch Template**:
 
@@ -633,7 +633,7 @@ Standalone account inventory roles grant read-only access to account-level infor
 
 **Deployment Steps**:
 
-1. Deploy trusted intermediate role in intermediate account (see [Intermediate Role Reference](/setup/iam-roles/intermediate-reference))
+1. Deploy trusted intermediate role in intermediate account (see [Intermediate Role Reference](/setup/iam-roles/intermediate))
 2. Log into AWS management account (or delegated administrator account)
 3. Deploy chained-org-inventory-role.yaml via Quick Launch
 4. Configure External ID parameter for inventory role
@@ -781,7 +781,7 @@ Standalone account inventory roles grant read-only access to account-level infor
 3. Verify intermediate role has permissions to assume inventory role
 4. Check trust policy on inventory role includes intermediate role or account
 5. Verify External IDs match for both hops
-6. Review intermediate role configuration (see [Intermediate Role Reference](/setup/iam-roles/intermediate-reference))
+6. Review intermediate role configuration (see [Intermediate Role Reference](/setup/iam-roles/intermediate))
 7. Check CloudTrail logs for both AssumeRole attempts
 
 

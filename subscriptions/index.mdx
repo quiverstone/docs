@@ -1,0 +1,101 @@
+---
+title: "Subscriptions & Tiers"
+description: "How Quiverstone subscriptions gate Teams, Groups, and collaboration features"
+---
+
+Quiverstone is sold as a subscription. Your subscription tier determines how many people can collaborate in your workspace, how you share AWS Organizations, Accounts, and Customers with them, and how you delegate administrative control.
+
+This page explains the four tiers, what each one unlocks, and how to choose the right one.
+
+## Tier at a glance
+
+| Tier | Max teams | Max seats (total) | Team types | Team roles available |
+|---|---|---|---|---|
+| **Free** | 0 | 1 (you) | — | — |
+| **Consultant** | 1 | 3 | `ACCESS` only | `MEMBER` only |
+| **Pro** | Unlimited | 10 | `ACCESS` + `SETTINGS` | `OWNER`, `ADMIN`, `MEMBER` |
+| **Enterprise** | Unlimited | Unlimited | `ACCESS` + `SETTINGS` | `OWNER`, `ADMIN`, `MEMBER` |
+
+<Note>
+Seat counts are **total across the subscription**, not per team. A Pro subscription with three teams still has a 10-seat cap shared between them.
+</Note>
+
+## What each tier unlocks
+
+### Free
+
+A single-user workspace. You can add Organizations, Accounts, and Customers, deploy IAM roles, and assume roles into your own AWS accounts. You cannot invite anyone else, create Teams, or share records.
+
+**Best for:** Evaluating Quiverstone, individual operators managing their own AWS estate.
+
+### Consultant
+
+A fixed, single-team workspace for a small practice. You get exactly one `ACCESS` team with up to three seats. Every member of that team automatically sees every Organization, Account, and Customer anyone on the team creates — there are no Groups and no sharing decisions to make.
+
+Only the subscription owner can create, edit, or delete records. Other members consume the shared inventory and assume AWS roles, but cannot manage the workspace.
+
+**Best for:** Solo consultants and two- or three-person consultancies who want shared visibility with zero access-control overhead.
+
+<Note>
+Consultant tier does not expose the Groups feature. Sharing is automatic and total. If you need granular control over who sees which Organization or Account, upgrade to Pro.
+</Note>
+
+[Consultant tier quickstart →](/subscriptions/consultant-quickstart)
+
+### Pro
+
+The first tier with real multi-team collaboration. You can create as many teams as you want, of two types:
+
+- **`SETTINGS` teams** are your admins. Members can create, edit, and delete Organizations, Accounts, Customers, Roles, and Groups. All `SETTINGS` team members automatically co-own every record any of them creates.
+- **`ACCESS` teams** are consumers. Members can only see resources that a `SETTINGS` team member has explicitly shared with them via a [Group](/setup/groups).
+
+Within a team, you can assign `OWNER`, `ADMIN`, or `MEMBER` roles to delegate team management.
+
+Pro is capped at 10 total seats across the entire subscription.
+
+**Best for:** MSPs, platform teams, and cloud consultancies that need to separate "people who manage the inventory" from "people who use it."
+
+### Enterprise
+
+Everything Pro offers, with the seat cap removed and room for larger, more complex team structures. Enterprise subscriptions scale to arbitrary user counts while keeping the same `ACCESS`/`SETTINGS` split.
+
+**Best for:** Large MSPs and enterprises with many operators, multiple business units, or compliance requirements that demand fine-grained access control at scale.
+
+## How sharing works in each tier
+
+The fundamental question at every tier is: *"Who can see which Organizations, Accounts, and Customers?"*
+
+| Tier | How resources are shared |
+|---|---|
+| **Free** | Only the account owner sees records. No sharing. |
+| **Consultant** | Automatic and total: every team member sees every record, no configuration required. |
+| **Pro** | Via [Groups](/setup/groups). A `SETTINGS` member creates a Group that links specific Users or `ACCESS` teams to specific resources and IAM roles. |
+| **Enterprise** | Same as Pro, at unlimited scale. |
+
+<Warning>
+Pro and Enterprise `ACCESS` team members see **nothing** until a `SETTINGS` team member adds them (directly or via their team) to a Group. This is intentional — new members start with zero access and are explicitly granted visibility.
+</Warning>
+
+## Choosing a tier
+
+<CardGroup cols={2}>
+  <Card title="I work alone" icon="user">
+    **Free** is enough to manage your own AWS estate. Upgrade when you need to share with a teammate.
+  </Card>
+  <Card title="Small consultancy, shared visibility" icon="users">
+    **Consultant** gives your team full shared visibility with zero per-record sharing decisions.
+  </Card>
+  <Card title="Separate admins from consumers" icon="user-shield">
+    **Pro** lets you keep the inventory under a small admin team and delegate scoped access to everyone else.
+  </Card>
+  <Card title="Large team, compliance needs" icon="building">
+    **Enterprise** removes the seat cap while keeping granular, audit-friendly access control.
+  </Card>
+</CardGroup>
+
+## Related concepts
+
+- [Teams](/setup/teams) — the `ACCESS`/`SETTINGS` model and how team roles work
+- [Groups](/setup/groups) — how Pro/Enterprise subscriptions share resources with `ACCESS` teams
+- [Roles](/setup/roles) — IAM role records that Groups grant access to
+- [Capability reference](/subscriptions/capabilities) — who can do what, by tier, team type, and team role

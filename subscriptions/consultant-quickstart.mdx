@@ -1,0 +1,103 @@
+---
+title: "Consultant Quickstart"
+description: "Set up a three-person Consultant workspace in under ten minutes"
+---
+
+Consultant is the simplest multi-user tier in Quiverstone. It gives you one team, three seats, and automatic shared visibility across everything the team creates. This page walks you through setting one up end to end.
+
+<Note>
+**Consultant tier in one sentence:** everyone on the team sees everything the team owner creates, and there are no Groups, no `SETTINGS` team, and no per-record sharing decisions.
+</Note>
+
+## What you get
+
+- **One team** of type `ACCESS`, created automatically with your subscription.
+- **Up to three seats**, including the owner.
+- **Automatic visibility:** every Organization, Account, and Customer the owner creates is instantly visible to every team member.
+- **Role assumption:** every member can assume any IAM role the owner has configured on a linked account.
+
+## What you don't get (and why)
+
+Consultant tier intentionally omits several Pro/Enterprise features to keep the experience simple:
+
+- **No `SETTINGS` team.** Only the subscription owner can create, edit, or delete records.
+- **No Groups.** Sharing is automatic — there is nothing to configure.
+- **No `OWNER`/`ADMIN` promotions.** All non-owner members are locked to `MEMBER`.
+
+If you need any of these, [upgrade to Pro](/subscriptions).
+
+## Before you start
+
+You will need:
+
+- A Quiverstone account on the Consultant tier.
+- The email addresses of up to two teammates you want to invite.
+- (Optional) At least one AWS Organization or standalone account you want to share with the team.
+
+## Walkthrough
+
+<Steps>
+  <Step title="Sign in as the subscription owner">
+    The person who purchased the Consultant subscription is automatically the team `OWNER`. Only the `OWNER` can invite members or manage the workspace inventory, so start by signing in with that account.
+  </Step>
+
+  <Step title="Add your AWS Organizations and Accounts">
+    Before inviting teammates, add the AWS resources you want them to see:
+
+    - [Add an Organization](/setup/organizations) and configure its inventory role so member accounts are discovered automatically.
+    - [Add any standalone Accounts](/setup/accounts) that aren't part of an Organization.
+    - [Add Customer records](/setup/customers) if you want to track the business entities behind each Organization.
+
+    Anything you create here will be automatically visible to every teammate you invite next.
+  </Step>
+
+  <Step title="Invite your teammates">
+    1. Navigate to **Teams** and open the existing `ACCESS` team.
+    2. Click **Invite Member** and enter an email address.
+    3. Repeat for your third seat if needed.
+
+    Each invitee receives an email invitation. Their membership becomes active once they accept and sign in.
+  </Step>
+
+  <Step title="Verify shared visibility">
+    Ask one of your teammates to sign in and open the **Organizations**, **Accounts**, and **Customers** lists. They should see every record you created in Step 2 without any further configuration.
+
+    If a teammate does not see an expected record, check that:
+    - Their membership shows as `ACTIVE` on the Teams page.
+    - They have signed out and back in since accepting the invite.
+  </Step>
+
+  <Step title="Deploy IAM roles for role assumption (optional)">
+    If your teammates need to jump into AWS consoles, follow the [Access Roles quickstart](/setup/accounts/access) to deploy one or more IAM roles into your target accounts. Once deployed, every team member can click **Assume Role** on any Account where that role is configured.
+  </Step>
+</Steps>
+
+## What members can and can't do
+
+| Action | Owner | Member |
+|---|---|---|
+| Create / edit / delete Organizations, Accounts, Customers | Yes | No |
+| View all team inventory | Yes | Yes |
+| Assume configured AWS roles | Yes | Yes |
+| Invite new members (up to the 3-seat cap) | Yes | No |
+| Change another member's role | Yes | No |
+| Upgrade the subscription | Yes | No |
+
+For the full capability matrix across all tiers, see the [Capability reference](/subscriptions/capabilities).
+
+## When to upgrade to Pro
+
+Consider upgrading to [Pro](/subscriptions) when you need any of the following:
+
+- **More than three seats.** Consultant is hard-capped at 3.
+- **Multiple teams.** For example, one team for internal staff and another for a contractor.
+- **Delegated administration.** A second `ADMIN` who can manage the inventory without owning the subscription.
+- **Selective sharing.** Showing different teammates different subsets of your AWS estate.
+
+Upgrading preserves all of your existing Organizations, Accounts, Customers, and team members. Your one `ACCESS` team remains in place, and you can start creating `SETTINGS` teams and Groups alongside it.
+
+## Related pages
+
+- [Subscriptions & Tiers](/subscriptions)
+- [Teams](/setup/teams)
+- [Capability reference](/subscriptions/capabilities)

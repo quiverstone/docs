@@ -1,6 +1,6 @@
 ---
-title: Inventory
-description: Deploy Quiverstone inventory roles to discover and monitor AWS accounts in your organization
+title: "Inventory Roles"
+description: "Deploy inventory roles so Quiverstone can discover and monitor AWS accounts in your Organization"
 ---
 
 Inventory roles provide read-only access to AWS Organizations, enabling Quiverstone to automatically discover accounts in your organization. Deploy these roles to enable organization-level account discovery and monitoring.
@@ -57,7 +57,7 @@ Direct inventory access is the most common deployment method where Quiverstone d
 </Steps>
 
 <Note>
-The inventory role only provides read-only access to AWS Organizations. It cannot make changes to your organization structure or account settings. For detailed deployment information, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
+The inventory role only provides read-only access to AWS Organizations. It cannot make changes to your organization structure or account settings. For detailed deployment information, see the [Inventory Roles Reference](/setup/iam-roles/inventory).
 </Note>
 
 ## Chained Inventory Deployment
@@ -116,14 +116,14 @@ Chained inventory requires two deployments: first the intermediate role, then th
 </Steps>
 
 <Note>
-For detailed deployment information, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
+For detailed deployment information, see the [Inventory Roles Reference](/setup/iam-roles/inventory).
 </Note>
 
 ## Standalone Account Inventory
 
 For AWS accounts that are not part of an organization, you can deploy a standalone account inventory role. This provides basic account information without organization-level discovery.
 
-For detailed information about standalone account inventory deployment, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
+For detailed information about standalone account inventory deployment, see the [Inventory Roles Reference](/setup/iam-roles/inventory).
 
 ## Next Steps
 
@@ -134,4 +134,4 @@ For detailed information about standalone account inventory deployment, see the 
 
 ## Detailed Deployment Information
 
-For comprehensive information about all inventory role templates, account types, permissions, deployment scenarios, and troubleshooting, see the [Inventory Roles Deployment Guide](/setup/iam-roles/inventory-reference).
+For comprehensive information about all inventory role templates, account types, permissions, deployment scenarios, and troubleshooting, see the [Inventory Roles Reference](/setup/iam-roles/inventory).
