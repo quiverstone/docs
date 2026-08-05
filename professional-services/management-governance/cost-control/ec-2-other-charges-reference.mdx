@@ -1,0 +1,132 @@
+---
+title: "EC2 Other Charges Reference"
+---
+
+Detailed breakdown of "EC2-Other" line items on AWS invoices.
+
+> **_Disclaimer: The details provided here are for general informational purposes and may not reflect the most current AWS pricing, services, or configurations. Costs and services may vary based on your specific AWS account settings, region, or use case. Always refer to the AWS Billing and Cost Management Dashboard or consult AWS documentation for the most accurate and up-to-date information._**
+
+The **"EC2-Other"** line item on an AWS invoice represents costs associated with Amazon Elastic Compute Cloud (EC2) that fall outside of standard compute instance charges. These charges are related to supplementary services, features, and resources used alongside EC2 instances. Below is a detailed breakdown of potential components under this category:
+
+---
+
+## **1. Elastic IP Addresses**
+
+- **What it is**: Static public IP addresses assigned to instances for consistent reachability.
+- **Charges apply when**:
+  - The Elastic IP is allocated but not associated with a running instance.
+  - More than one Elastic IP is associated with a single instance.
+- **Costs**:
+  - Typically charged per hour when idle or unused.
+  - No charge for a single Elastic IP actively associated with a running instance.
+
+---
+
+## **2. Elastic Load Balancing (ELB)**
+
+- **What it is**: Managed load balancers that distribute incoming traffic across multiple EC2 instances.
+- **Charges apply for**:
+  - The number of active load balancers.
+  - Processed data (charged per GB).
+- **Types of ELBs**:
+  - **Application Load Balancer (ALB)**: HTTP/HTTPS traffic.
+  - **Network Load Balancer (NLB)**: High-throughput TCP/UDP traffic.
+  - **Gateway Load Balancer (GWLB)**: Third-party virtual appliances.
+- **Costs**:
+  - Hourly charge for each load balancer.
+  - Data transfer fees based on the volume of traffic.
+
+---
+
+## **3. Data Transfer Costs**
+
+- **What it is**: Costs for transferring data to and from EC2 instances.
+- **Charges include**:
+  - **Data transfer out**: Transferring data to the internet from EC2 instances.
+  - **Inter-region data transfer**: Data moved between AWS regions.
+  - **Inter-AZ data transfer**: Data moved between availability zones within the same region.
+- **Exemptions**:
+  - Data transferred between EC2 instances in the same AZ is usually free if using private IPs.
+
+---
+
+## **4. EBS Volumes and Snapshots**
+
+- **What it is**: Persistent storage volumes (Elastic Block Store) attached to EC2 instances and backups (snapshots).
+- **Charges include**:
+  - **Provisioned storage**: Charged per GB/month based on volume type (e.g., General Purpose SSD, Provisioned IOPS SSD).
+  - **Snapshot storage**: Charged per GB for data stored in Amazon S3.
+  - **Provisioned IOPS**: Extra cost for high-performance IOPS on certain volume types.
+
+---
+
+## **5. Auto Scaling**
+
+- **What it is**: Service to automatically scale EC2 instances up or down based on demand.
+- **Charges apply for**:
+  - Instances launched as part of the scaling activity.
+  - Monitoring metrics (if enabled) via CloudWatch for Auto Scaling.
+
+---
+
+## **6. Elastic Inference**
+
+- **What it is**: Service that adds GPU-powered inference acceleration to EC2 instances for machine learning workloads.
+- **Charges include**:
+  - Hourly usage of Elastic Inference accelerators.
+  - Costs vary by the accelerator type (e.g., eia1.medium, eia1.large).
+
+---
+
+## **7. Reserved Instances (RIs)**
+
+- **What it is**: Discounted pricing for committing to a specific EC2 instance type in a particular region over a term (1 or 3 years).
+- **Charges include**:
+  - The upfront cost or recurring payment for reserved capacity.
+  - Savings from RIs may appear under this category as discounts.
+
+---
+
+## **8. Savings Plans**
+
+- **What it is**: Flexible pricing model offering discounted rates for EC2, Lambda, and Fargate usage in exchange for a commitment to a certain usage amount (measured in \$/hour) over 1 or 3 years.
+- **Charges include**:
+  - The monthly cost of the Savings Plan.
+  - Discounts applied to EC2 usage under the plan.
+
+---
+
+## **9. Spot Instances**
+
+- **What it is**: Instances purchased at discounted rates by utilizing unused AWS capacity.
+- **Charges apply for**:
+  - Hourly usage of Spot Instances.
+  - Bids placed for capacity in some cases (based on market price).
+
+---
+
+## **10. Networking**
+
+- **What it is**: Costs associated with Amazon VPC (Virtual Private Cloud) networking services.
+- **Charges include**:
+  - **VPC Peering**: Data transfer between VPCs in the same or different regions.
+  - **Transit Gateway**: Managed service for routing traffic between multiple VPCs or on-premises networks.
+  - **PrivateLink**: Securely access AWS services over private endpoints.
+- **Costs**:
+  - Charged based on data transfer and resource hours.
+
+---
+
+## **Monitoring Usage and Costs**
+
+To get a detailed breakdown of the **"EC2-Other"** charges:
+
+1. Go to the **AWS Billing and Cost Management Dashboard**.
+2. Download the **detailed billing report** or view the **Cost Explorer**.
+3. Filter by **service category** to see specific charges for EC2-related services.
+
+---
+
+## **Summary**
+
+The **"EC2-Other"** category encompasses a range of supplementary services and resources essential for running and managing EC2 workloads. Understanding these charges helps optimize costs and usage while avoiding unexpected billing surprises. By monitoring and analyzing these charges, you can ensure efficient and cost-effective use of AWS services.

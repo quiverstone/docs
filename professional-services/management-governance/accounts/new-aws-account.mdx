@@ -1,0 +1,89 @@
+---
+title: "New AWS Account"
+---
+
+A guide to creating and configuring a new AWS account within your organization.
+
+Setting up a new AWS account correctly from the start saves significant time and avoids security pitfalls. This guide walks through the recommended steps for provisioning a new account, whether standalone or as a member of an AWS Organization.
+
+---
+
+## **Prerequisites**
+
+Before creating a new account, ensure you have:
+
+- A unique email address for the account's root user (see [Naming Standards](/professional-services/management-governance/convention/naming-standards) for email conventions).
+- Access to your AWS Organizations management account (if creating a member account).
+- A defined naming convention for the account name.
+
+---
+
+## **Creating an Account in AWS Organizations**
+
+### **1. Navigate to AWS Organizations**
+
+From the management account console, go to **AWS Organizations** → **Add an AWS account** → **Create an AWS account**.
+
+### **2. Provide Account Details**
+
+- **Account name**: Follow your established naming convention (e.g., `workload-production`).
+- **Email address**: Use a unique email alias (e.g., `aws+workload-prod@corp.co`).
+- **IAM role name**: Accept the default `OrganizationAccountAccessRole` or specify a custom role name for cross-account access.
+
+### **3. Place in the Correct OU**
+
+Move the new account into the appropriate Organizational Unit (OU) to inherit the correct Service Control Policies (SCPs), tag policies, and guardrails.
+
+---
+
+## **Post-Creation Configuration**
+
+After the account is created, complete the following baseline tasks:
+
+### **Secure the Root User**
+
+1. Set a strong password for the root user.
+2. Enable MFA on the root user immediately.
+3. Store root credentials securely (e.g., in a secrets vault).
+4. Do **not** use the root user for day-to-day operations.
+
+### **Configure IAM Access**
+
+- Deploy an IAM role for cross-account access from your identity provider or management account.
+- Enable AWS IAM Identity Center (SSO) access for the account.
+
+### **Enable Baseline Services**
+
+- **AWS CloudTrail**: Ensure organization-level trail covers this account.
+- **AWS Config**: Verify the account is recording configuration changes.
+- **Amazon GuardDuty**: Confirm enrollment via the delegated administrator.
+
+### **Set Alternate Contacts**
+
+Configure billing, operations, and security contacts so critical notifications reach the right teams. See [Configure AWS Alternate Contacts](/professional-services/management-governance/accounts/configure-aws-alternate-contacts).
+
+### **Apply Tags**
+
+Tag the account with standard metadata (e.g., `environment`, `owner`, `cost-center`) as defined in your [Resource Tagging Strategy](/professional-services/management-governance/convention/resource-tagging-strategy).
+
+---
+
+## **Standalone Account Creation**
+
+If you are not using AWS Organizations, the process is similar but you will:
+
+1. Sign up at [aws.amazon.com](https://aws.amazon.com).
+2. Provide a credit card and verify your identity.
+3. Manually configure all security baselines (no inherited SCPs or centralized logging).
+
+<Note>
+We strongly recommend using AWS Organizations even for small environments. The governance benefits far outweigh the minimal setup effort.
+</Note>
+
+---
+
+## **Next Steps**
+
+- [Configure AWS Alternate Contacts](/professional-services/management-governance/accounts/configure-aws-alternate-contacts)
+- [Account & Email Naming Standards](/professional-services/management-governance/convention/naming-standards)
+- [Organization Configuration](/professional-services/management-governance/organizations/organization-configuration)
