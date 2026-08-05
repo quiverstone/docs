@@ -129,42 +129,42 @@
           {
             "group": "Core Services",
             "pages": [
-              "professional-services/strategic-consulting",
+              "consulting/strategic-consulting",
               {
                 "group": "Management & Governance",
                 "pages": [
                   {
                     "group": "Accounts",
                     "pages": [
-                      "professional-services/management-governance/accounts/new-aws-account",
-                      "professional-services/management-governance/accounts/configure-aws-alternate-contacts"
+                      "consulting/management-governance/accounts/new-aws-account",
+                      "consulting/management-governance/accounts/configure-aws-alternate-contacts"
                     ]
                   },
                   {
                     "group": "Organizations",
                     "pages": [
-                      "professional-services/management-governance/organizations/organization-configuration"
+                      "consulting/management-governance/organizations/organization-configuration"
                     ]
                   },
                   {
                     "group": "Convention",
                     "pages": [
-                      "professional-services/management-governance/convention/naming-standards",
-                      "professional-services/management-governance/convention/resource-naming-convention",
-                      "professional-services/management-governance/convention/resource-tagging-strategy"
+                      "consulting/management-governance/convention/naming-standards",
+                      "consulting/management-governance/convention/resource-naming-convention",
+                      "consulting/management-governance/convention/resource-tagging-strategy"
                     ]
                   },
                   {
                     "group": "References",
                     "pages": [
-                      "professional-services/management-governance/reference/aws-regions-and-partitions",
-                      "professional-services/management-governance/reference/http-api-vs-rest-api"
+                      "consulting/management-governance/reference/aws-regions-and-partitions",
+                      "consulting/management-governance/reference/http-api-vs-rest-api"
                     ]
                   },
                   {
                     "group": "Cost Control",
                     "pages": [
-                      "professional-services/management-governance/cost-control/ec-2-other-charges-reference"
+                      "consulting/management-governance/cost-control/ec-2-other-charges-reference"
                     ]
                   }
                 ]
@@ -175,14 +175,14 @@
                   {
                     "group": "AWS Control Tower",
                     "pages": [
-                      "professional-services/management-governance/control-tower/aws-control-tower-price-estimations"
+                      "consulting/management-governance/control-tower/aws-control-tower-price-estimations"
                     ]
                   },
                   {
                     "group": "Security",
                     "pages": [
-                      "professional-services/management-governance/security/core-compliance",
-                      "professional-services/management-governance/security/aws-security-ids-ips-solutions"
+                      "consulting/management-governance/security/core-compliance",
+                      "consulting/management-governance/security/aws-security-ids-ips-solutions"
                     ]
                   }
                 ]
@@ -193,19 +193,19 @@
                   {
                     "group": "Solutions",
                     "pages": [
-                      "professional-services/ai-automation/solutions"
+                      "consulting/ai-automation/solutions"
                     ]
                   },
                   {
                     "group": "Resources",
                     "pages": [
-                      "professional-services/ai-automation/get-started"
+                      "consulting/ai-automation/get-started"
                     ]
                   },
                   {
                     "group": "Tools",
                     "pages": [
-                      "professional-services/ai-automation/basic-tooling"
+                      "consulting/ai-automation/basic-tooling"
                     ]
                   }
                 ]
@@ -215,16 +215,16 @@
           {
             "group": "Engagement Models",
             "pages": [
-              "professional-services/engagement/ad-hoc-hourly",
-              "professional-services/engagement/project-based",
-              "professional-services/engagement/retainer"
+              "consulting/engagement/ad-hoc-hourly",
+              "consulting/engagement/project-based",
+              "consulting/engagement/retainer"
             ]
           },
           {
             "group": "Outside Resources",
             "pages": [
-              "professional-services/consulting-blog",
-              "professional-services/code-repository"
+              "consulting/consulting-blog",
+              "consulting/code-repository"
             ]
           }
         ]
