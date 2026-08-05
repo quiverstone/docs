@@ -25,7 +25,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "quiverstone"
+              "app"
             ]
           },
           {
@@ -113,6 +113,118 @@
             "group": "Integrations",
             "pages": [
               "integrations"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Consulting",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "professional-services"
+            ]
+          },
+          {
+            "group": "Core Services",
+            "pages": [
+              "professional-services/strategic-consulting",
+              {
+                "group": "Management & Governance",
+                "pages": [
+                  {
+                    "group": "Accounts",
+                    "pages": [
+                      "professional-services/management-governance/accounts/new-aws-account",
+                      "professional-services/management-governance/accounts/configure-aws-alternate-contacts"
+                    ]
+                  },
+                  {
+                    "group": "Organizations",
+                    "pages": [
+                      "professional-services/management-governance/organizations/organization-configuration"
+                    ]
+                  },
+                  {
+                    "group": "Convention",
+                    "pages": [
+                      "professional-services/management-governance/convention/naming-standards",
+                      "professional-services/management-governance/convention/resource-naming-convention",
+                      "professional-services/management-governance/convention/resource-tagging-strategy"
+                    ]
+                  },
+                  {
+                    "group": "References",
+                    "pages": [
+                      "professional-services/management-governance/reference/aws-regions-and-partitions",
+                      "professional-services/management-governance/reference/http-api-vs-rest-api"
+                    ]
+                  },
+                  {
+                    "group": "Cost Control",
+                    "pages": [
+                      "professional-services/management-governance/cost-control/ec-2-other-charges-reference"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Professional Services",
+                "pages": [
+                  {
+                    "group": "AWS Control Tower",
+                    "pages": [
+                      "professional-services/management-governance/control-tower/aws-control-tower-price-estimations"
+                    ]
+                  },
+                  {
+                    "group": "Security",
+                    "pages": [
+                      "professional-services/management-governance/security/core-compliance",
+                      "professional-services/management-governance/security/aws-security-ids-ips-solutions"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "AI & Automation",
+                "pages": [
+                  {
+                    "group": "Solutions",
+                    "pages": [
+                      "professional-services/ai-automation/solutions"
+                    ]
+                  },
+                  {
+                    "group": "Resources",
+                    "pages": [
+                      "professional-services/ai-automation/get-started"
+                    ]
+                  },
+                  {
+                    "group": "Tools",
+                    "pages": [
+                      "professional-services/ai-automation/basic-tooling"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Engagement Models",
+            "pages": [
+              "professional-services/engagement/ad-hoc-hourly",
+              "professional-services/engagement/project-based",
+              "professional-services/engagement/retainer"
+            ]
+          },
+          {
+            "group": "Outside Resources",
+            "pages": [
+              "professional-services/consulting-blog",
+              "professional-services/code-repository"
             ]
           }
         ]

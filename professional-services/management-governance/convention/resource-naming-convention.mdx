@@ -1,0 +1,93 @@
+---
+title: "Resource Naming Convention"
+---
+
+A guide to creating consistent and effective naming conventions for AWS resources.
+
+Establishing consistent and well-defined naming conventions is critical for maintaining clarity, organization, and effective management of AWS resources. A solid naming strategy ensures:
+
+- Easy identification and management of resources.
+- Proper cost allocation.
+- Compliance with regulatory requirements.
+
+---
+
+## **Key Considerations**
+
+### **Document Your Convention**
+
+1. Create a clear guide that outlines naming standards and tag usage.
+2. Share this guide with your team to ensure consistent application.
+3. Maintain version control to track changes and provide historical context.
+
+### **Maintain Consistency**
+
+1. Apply naming conventions uniformly across all AWS resources.
+2. Use tools like **Service Control Policies (SCPs)** and **Tag Policies** to enforce standards.
+
+---
+
+## **Practical Guidelines**
+
+### **Abbreviations**
+
+1. **Standardize Abbreviations**: Ensure all abbreviations are documented and understood.
+2. Use unique identifiers (e.g., timestamps or sequence numbers) to prevent duplication.
+3. Avoid ambiguous abbreviations to reduce confusion.
+
+### **Leverage Constraints**
+
+1. Follow service-specific naming rules, such as character limits and allowed symbols.
+2. Use prefixes (e.g., `aws:`) to protect tags and add clarity.
+
+### **Be Descriptive**
+
+1. Choose names that clearly indicate the resource's function or purpose (e.g., `finance-sql-prod`).
+2. Avoid generic names like `server-1` or `bucket-2`.
+
+### **Hierarchical Organization**
+
+1. Reflect relationships between resources using hierarchical structures.
+   - Example: `appname-resourcetype-env`
+2. Include versioning or timestamps for tracking (e.g., `app-v1-prod`).
+
+### **Avoid Redundancies**
+
+1. Skip obvious repetitions in names where the context is already clear.
+   - Example: Avoid `ec2-instance-instance-prod`.
+
+---
+
+## **Readability Best Practices**
+
+1. **Use Lowercase Characters**: AWS recommends lowercase names to avoid case sensitivity issues.
+2. **Hyphens or Underscores**: Separate words with `-` or `_` for clarity, depending on service constraints.
+3. **Avoid Special Characters**: Refrain from using unsupported symbols or spaces.
+
+---
+
+## **Iteration and Flexibility**
+
+1. Revise your naming conventions as needs evolve.
+2. Strike a balance between consistency and adaptability to future changes.
+
+---
+
+## **Examples**
+
+### **Simple Naming Example**
+
+- **Basic**: `prod-db-server`
+
+### **Advanced Naming Example**
+
+- **Complex**: `{app}-{resource}-{team}-{environment}`
+  - Example: `myapp-s3-storage-prod`
+
+---
+
+## **Resources**
+
+- [**<u>AWS Naming Guidelines</u>**](https://docs.aws.amazon.com/general/latest/gr/aws-tagging.html)
+- [**<u>AWS Tagging Best Practices</u>**](https://aws.amazon.com/architecture/tagging-best-practices/)
+- [**<u>AWS Service Control Policies</u>**](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html)

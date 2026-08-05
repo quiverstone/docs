@@ -1,0 +1,19 @@
+---
+title: "Self-Hosted Stack"
+---
+
+import SnippetIntro from '/snippets/snippet-intro.mdx';
+
+Full-Stack AI & Automation Suite
+
+This template deploys a comprehensive ecosystem for building and hosting private AI agents and workflows:
+
+- **Workflow Engine:** n8n backed by a PostgreSQL 16 database.
+- **Local LLM Host:** Ollama configured with NVIDIA GPU passthrough for high-performance local inference.
+- **Web Interface:** Open WebUI for interacting with Ollama models and managing chats.
+- **Security:** Cloudflare Tunnel (cloudflared) to expose services safely without opening firewall ports.
+- **Maintenance:** Watchtower to keep all images updated automatically.
+
+_Prerequisites: Requires an .env file for credentials (Postgres, n8n encryption, Cloudflare token) and NVIDIA Container Toolkit for GPU support._
+
+**ORIGINAL SOURCE:** [**<u>https://snippets.cacher.io/snippet/e0acc3127d5efed1e2e9</u>**](https://snippets.cacher.io/snippet/e0acc3127d5efed1e2e9)

@@ -1,0 +1,95 @@
+---
+title: "AWS Control Tower Price Estimations"
+---
+
+Estimated breakdown of core AWS Control Tower Services Costs
+
+## **Baseline Costs for Control Tower and Customizations (CfCT)**
+
+Deploying AWS Control Tower and its Customizations involves costs associated with the AWS services they configure and utilize. Below is an initial baseline pricing calculation for setting up these solutions in a new AWS account without additional accounts or running workload resources.
+
+## [**<u>​</u>**](https://docs.quiverstone.io/consulting/pricing/control-tower-costs#aws-control-tower-deployment-costs)**AWS Control Tower Deployment Costs**
+
+AWS Control Tower itself has no additional charge; however, it provisions and configures various AWS services that incur costs:
+
+- **AWS Config**: Records configuration changes and evaluates compliance. Charges include recording configuration items at 0.003peritemandruleevaluationsat0.003_peritemandruleevaluationsat_0.001 per evaluation (for the first 100,000 evaluations).
+- **AWS CloudTrail**: Records account activity and API usage. Charges are \$2.00 per 100,000 management events.
+- **Amazon S3**: Stores logs and other data. Charges are \$0.023 per GB for standard storage.
+- **AWS Service Catalog, Amazon CloudWatch, Amazon SNS, and Amazon VPC**: Additional charges apply based on usage.
+
+**Initial Setup Example**:When setting up AWS Control Tower in a single region (e.g., US East N. Virginia) without creating new accounts or resources:
+
+- **One-Time Charges**:**Total One-Time Charge**: \$0.033
+  - **AWS Config**: Records 3 configuration items at \$0.003 each:
+    - 3 items × 0.003/item=0.003/_item_=0.009
+  - **AWS Config Rule Evaluations**: Evaluates 2 rules at \$0.001 each:
+    - 2 evaluations × 0.001/evaluation=0.001/_evaluation_=0.002
+  - **AWS CloudTrail**: Records 1,100 events at \$2.00 per 100,000 events:
+    - (1,100 events / 100,000) × 2.00=2.00=0.022
+
+Additional charges accrue based on the usage of the services mentioned [above.AWS](http://above.AWS) reference documentation for Control Tower Pricing:[**<u>Control Tower Pricing Explination</u>**](https://docs.aws.amazon.com/controltower/latest/userguide/pricing.html)**<u>[Control Tower Example Use Case Pricing](https://aws.amazon.com/controltower/pricing/)</u>**
+
+## [**<u>​</u>**](https://docs.quiverstone.io/consulting/pricing/control-tower-costs#customizations-for-aws-control-tower-cfct-deployment-costs)**Customizations for AWS Control Tower (CfCT) Deployment Costs**
+
+CfCT enables custom templates and policies deployment, utilizing services like AWS CodePipeline, AWS CodeBuild, AWS Lambda, and Amazon EventBridge. Costs depend on usage:
+
+- **AWS CodePipeline**: Charges per active pipeline per month.
+- **AWS CodeBuild**: Charges based on build minutes.
+- **AWS Lambda**: Charges based on the number of requests and compute time.
+- **Amazon EventBridge**: Charges per event published.
+
+**Example Cost**:Running 100 builds in a month, each lasting 5 minutes, using a`build.general1.small`instance:
+
+- **AWS CodeBuild**:
+  - 100 builds × 5 minutes/build = 500 minutes
+  - Pricing varies by region; refer to the [**<u>AWS CodeBuild Pricing</u>**](https://aws.amazon.com/codebuild/pricing/) page for current rates.
+
+**Approximate Monthly Cost**: \$3.00Additional charges apply for AWS CodePipeline, AWS Lambda, and Amazon EventBridge based on [usage.AWS](http://usage.AWS) reference documentation for Control Tower Customizations Pricing:[**<u>Control Tower Customizations Pricing Explination</u>**](https://docs.aws.amazon.com/controltower/latest/userguide/cost.html)
+
+## [**<u>​</u>**](https://docs.quiverstone.io/consulting/pricing/control-tower-costs#example-use-cases-and-estimated-monthly-costs)**Example Use Cases and Estimated Monthly Costs**
+
+### [**<u>​</u>**](https://docs.quiverstone.io/consulting/pricing/control-tower-costs#1-two-account-setup:-development-and-production-hosting-a-single-3-tier-web-application)**1. Two-Account Setup: Development and Production Hosting a Single 3-Tier Web Application**
+
+**Assumptions**:
+
+- Two accounts: Development and Production.
+- Each account hosts a 3-tier web application with 5 resources per tier (15 resources per account).
+- Resources undergo 10 configuration changes per month.
+- 5 detective controls enabled per account.
+
+**Estimated Monthly Costs**:
+
+- **AWS Config**:**Total AWS Config Cost**: \$3.40/month
+  - **Configuration Items**:
+    - 2 accounts × 15 resources/account × 10 changes/resource = 300 items
+    - 300 items × 0.003/item=0.003/_item_=0.90
+  - **Rule Evaluations**:
+    - 5 controls × 2 accounts × 250 evaluations/control = 2,500 evaluations
+    - 2,500 evaluations × 0.001/evaluation=0.001/_evaluation_=2.50
+- **AWS CloudTrail, Amazon S3, and Other Services**:
+  - Additional charges based on usage.
+
+**Approximate Additional Monthly Cost**: \$3.40 plus usage-based charges.
+
+### [**<u>​</u>**](https://docs.quiverstone.io/consulting/pricing/control-tower-costs#2-four-to-five-aws-accounts-with-3-5-3-tier-web-applications-and-microservices)**2. Four to Five AWS Accounts with 3-5 3-Tier Web Applications and Microservices**
+
+**Assumptions**:
+
+- 5 accounts.
+- Each account hosts 4 applications, each with 3 tiers and 5 resources per tier (60 resources per account).
+- Resources undergo 15 configuration changes per month.
+- 5 detective controls enabled per account.
+
+**Estimated Monthly Costs**:
+
+- **AWS Config**:**Total AWS Config Cost**: \$26.00/month
+  - **Configuration Items**:
+    - 5 accounts × 60 resources/account × 15 changes/resource = 4,500 items
+    - 4,500 items × 0.003/item=0.003/_item_=13.50
+  - **Rule Evaluations**:
+    - 5 controls × 5 accounts × 500 evaluations/control = 12,500 evaluations
+    - 12,500 evaluations × 0.001/evaluation=0.001/_evaluation_=12.50
+- **AWS CloudTrail, Amazon S3, and Other Services**:
+  - Additional charges based on usage.
+
+**Approximate Additional Monthly Cost**: \$26.00 plus usage-based charges.**Note**: These estimates are for services related to AWS Control Tower and CfCT. Actual costs will vary based on specific service usage and configurations. For detailed pricing, refer to the[**<u>AWS Pricing Calculator</u>**](https://calculator.aws/#/).

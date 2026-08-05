@@ -1,0 +1,116 @@
+---
+title: "Configure AWS Alternate Contacts"
+---
+
+A guide to setting up alternate contacts on your AWS accounts for billing, operations, and security notifications.
+
+AWS allows you to configure **alternate contacts** so that important notifications are routed to the correct teams rather than only the root account email. This is a critical governance step that ensures billing alerts, operational issues, and security findings reach the people who can act on them.
+
+---
+
+## **Why Alternate Contacts Matter**
+
+By default, AWS sends all notifications to the root account email. This creates problems:
+
+- Security alerts may go unnoticed if the root inbox isn't actively monitored.
+- Billing notifications may not reach finance teams.
+- Operational alerts (e.g., service health) may not reach the on-call team.
+
+Alternate contacts solve this by routing each category of notification to a dedicated recipient.
+
+---
+
+## **Contact Types**
+
+AWS supports three alternate contact categories:
+
+| Contact Type | Purpose | Example Recipient |
+|:--|:--|:--|
+| **Billing** | Invoice notifications, payment issues, cost anomaly alerts | `billing@corp.co` or finance team DL |
+| **Operations** | Service health events, maintenance windows, operational notifications | `ops@corp.co` or platform team DL |
+| **Security** | Abuse reports, compromised resource notifications, security findings | `security@corp.co` or security team DL |
+
+---
+
+## **Configuring via the Console**
+
+1. Sign in to the AWS Management Console.
+2. Navigate to **Account Settings** (or go to `https://console.aws.amazon.com/billing/home#/account`).
+3. Scroll to the **Alternate Contacts** section.
+4. Enter the **Full Name**, **Title**, **Email Address**, and **Phone Number** for each contact type.
+5. Click **Update**.
+
+---
+
+## **Configuring via AWS CLI**
+
+```bash
+aws account put-alternate-contact \
+  --alternate-contact-type BILLING \
+  --name "Finance Team" \
+  --title "Billing Contact" \
+  --email-address "billing@corp.co" \
+  --phone-number "+1-555-000-0001"
+
+aws account put-alternate-contact \
+  --alternate-contact-type OPERATIONS \
+  --name "Platform Team" \
+  --title "Operations Contact" \
+  --email-address "ops@corp.co" \
+  --phone-number "+1-555-000-0002"
+
+aws account put-alternate-contact \
+  --alternate-contact-type SECURITY \
+  --name "Security Team" \
+  --title "Security Contact" \
+  --email-address "security@corp.co" \
+  --phone-number "+1-555-000-0003"
+```
+
+---
+
+## **Configuring at Scale with AWS Organizations**
+
+If you manage multiple accounts, you can set alternate contacts programmatically across all member accounts from the management account:
+
+```bash
+aws account put-alternate-contact \
+  --account-id 123456789012 \
+  --alternate-contact-type SECURITY \
+  --name "Security Team" \
+  --title "Security Contact" \
+  --email-address "security@corp.co" \
+  --phone-number "+1-555-000-0003"
+```
+
+<Note>
+This requires the **Organizations trusted access** for the Account Management service to be enabled. You can also automate this with AWS CloudFormation StackSets or Terraform.
+</Note>
+
+---
+
+## **Best Practices**
+
+- Use **distribution lists** or **shared mailboxes** rather than individual emails so contacts survive team changes.
+- Set alternate contacts on **every account** in your organization, not just the management account.
+- Review and update contacts quarterly or when team structures change.
+- Consider using the same security contact across all accounts for centralized incident response.
+
+---
+
+## **Verification**
+
+To confirm your alternate contacts are set:
+
+```bash
+aws account get-alternate-contact --alternate-contact-type BILLING
+aws account get-alternate-contact --alternate-contact-type OPERATIONS
+aws account get-alternate-contact --alternate-contact-type SECURITY
+```
+
+---
+
+## **Next Steps**
+
+- [New AWS Account Setup](/professional-services/management-governance/accounts/new-aws-account)
+- [Organization Configuration](/professional-services/management-governance/organizations/organization-configuration)

@@ -1,0 +1,119 @@
+---
+title: "Resource Tagging Strategy"
+---
+
+A guide to effective AWS resource tagging strategies for management and optimization.
+
+Proper tagging in AWS is essential for resource management, cost optimization, automation, and compliance. A well-thought-out tagging strategy helps streamline your AWS infrastructure while aligning with industry best practices.
+
+Tags enable better visibility, organization, and governance across your AWS accounts and regions.
+
+---
+
+## **Collaborate with Stakeholders**
+
+Develop your tagging strategy collaboratively with teams across finance, security, operations, and development. Ensure:
+
+- Clear guidelines on tag naming conventions.
+- Predefined allowed values and their purposes.
+- Alignment with organizational goals and policies.
+
+---
+
+## **Benefits of Effective Tagging**
+
+### **Organization and Identification**
+
+- Simplify resource identification by purpose, owner, or custom criteria.
+- Quickly locate resources and reduce time spent on infrastructure management.
+
+### **Cost Allocation and Reporting**
+
+- Use tags with AWS Cost Explorer and AWS Organizations for detailed cost reports.
+- Allocate costs to departments, projects, or teams effectively.
+- Optimize spending on AWS services.
+
+### **Access Control and Security**
+
+- Combine tags with AWS IAM policies for fine-grained access control.
+- Restrict access to sensitive resources based on tags.
+- Reduce the risk of unauthorized access or changes.
+
+### **Automation and Orchestration**
+
+- Use tags in automation scripts for targeted actions like backups, scaling, or updates.
+- Streamline infrastructure changes and reduce human error.
+
+### **Compliance and Governance**
+
+- Enable auditing and compliance tracking with appropriate tags.
+- Demonstrate adherence to internal policies and external regulations.
+
+---
+
+## **Tag (Almost) Everything**
+
+Tagging should be applied to as many resources as possible, including EC2 instances, S3 buckets, and RDS instances. Ensure non-metered resources are tagged appropriately:
+
+[**<u>Non-Metered Resource Tag Restrictions</u>**](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/allocation-tag-restrictions.html)
+
+---
+
+## **Best Practices**
+
+### **Use Prefixes**
+
+- Standardize tag prefixes for clarity and categorization:
+  - `env:` for environment tags.
+  - `costcenter:` for cost allocation.
+  - `owner:` for ownership.
+
+### **Environment Tags**
+
+- Identify the environment (`dev`, `test`, `prod`) where a resource is deployed.
+- Prevent mistakes and manage resources effectively.
+
+> **_Note: Deploying environment-specific accounts can also help segregate resources._**
+
+### **Standardization**
+
+- Use predefined tags for cost, security, and compliance.
+- Ensure tags are descriptive and provide meaningful insights (e.g., purpose, owner, project).
+
+### **Resource Groups**
+
+- Group resources with common attributes (e.g., tags) using AWS Resource Groups.
+- Simplify management across accounts and regions.
+
+### **Automate Tagging**
+
+- Utilize tools like AWS Config, AWS Lambda, and AWS CloudFormation to automate tagging.
+- Ensure consistent tagging that aligns with organizational objectives.
+
+### **Security and Compliance**
+
+- Tag sensitive or regulated resources (e.g., `compliance:HIPAA` or `compliance:PCI`).
+
+### **Cost Allocation**
+
+- Use cost allocation tags to categorize costs by department, application, or resource type.
+
+---
+
+## **Review and Update**
+
+Regularly review and refine tagging policies to align with evolving organizational needs. Retire outdated tags to reduce noise and maintain clarity.
+
+---
+
+## **Monitor and Audit**
+
+- Regularly monitor and audit tags for consistency and correct usage.
+- Identify and resolve tagging issues before they escalate.
+
+---
+
+## **Additional Resources**
+
+- Tagging examples and best practices in AWS documentation (linked at the end of this module).
+- [**<u>AWS Tagging Best Practices</u>**](https://aws.amazon.com/architecture/tagging-best-practices/)

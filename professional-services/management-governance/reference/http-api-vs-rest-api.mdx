@@ -1,0 +1,69 @@
+---
+title: "HTTP API vs REST API"
+---
+
+Comparison of HTTP API and REST API in AWS API Gateway for Serverless applications.
+
+n the context of the **Serverless Framework** and deploying applications on AWS, the distinction between **HTTP APIs** and **REST APIs** refers to the two types of API Gateway offerings provided by AWS. These differ in terms of features, performance, cost, and use cases.
+
+---
+
+## **HTTP API (Amazon API Gateway v2)**
+
+- **Performance**:
+  - Optimized for high performance, offering **lower latency** and **higher throughput** compared to REST APIs.
+- **Cost**:
+  - **More cost-effective** than REST APIs due to a simplified pricing model.
+- **Features**:
+  - Focuses on **core capabilities** for handling HTTP requests and responses.
+  - Lacks some advanced features available in REST APIs, making it more **streamlined** and simpler to use.
+- **Use Cases**:
+  - Ideal for **most serverless applications** requiring straightforward HTTP proxying.
+  - Suitable when **performance** and **cost-efficiency** are prioritized over advanced API management features.
+
+---
+
+## **REST API (Amazon API Gateway v1)**
+
+- **Features**:
+  - Provides a **broader set of features**, including:
+    - Request validation.
+    - Request and response transformations.
+    - **WAF (Web Application Firewall)** integration.
+    - Comprehensive logging and monitoring capabilities.
+    - Deeper integration with AWS services (e.g., AWS Lambda, DynamoDB).
+- **Cost**:
+  - **More expensive** than HTTP APIs, especially at scale, due to its extensive feature set and capabilities.
+- **Use Cases**:
+  - Designed for **complex applications** requiring:
+    - Advanced API management (e.g., API keys, rate limiting).
+    - Detailed monitoring and logging.
+    - Sophisticated integrations with AWS services.
+  - Suitable for scenarios demanding **fine-grained control** over API behavior and transformations.
+
+---
+
+## **When to Use Each**
+
+### **Use HTTP API when:**
+
+- You need **high performance** and **low latency**.
+- Building **straightforward APIs** without the need for advanced management features.
+- **Cost-effectiveness** is a key concern.
+
+### **Use REST API when:**
+
+- Advanced API management features are required, such as:
+  - **API keys**, rate limiting, and request validation.
+  - Detailed monitoring and logging.
+- Your application demands **complex integrations** with AWS services that HTTP APIs do not support.
+- You need **fine control** over request and response transformations.
+
+---
+
+## **Key Takeaways**
+
+- For **most new applications**, **HTTP APIs** are sufficient due to their simplicity, lower cost, and higher performance.
+- For **complex applications** requiring extensive features and integrations, **REST APIs** are the preferred choice despite higher costs.
+
+Choosing the right type of API Gateway depends on the specific requirements of your application, including performance, cost, and feature needs.

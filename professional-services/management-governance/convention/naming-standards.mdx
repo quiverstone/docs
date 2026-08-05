@@ -1,0 +1,130 @@
+---
+title: "Account & Email Naming Standards"
+---
+
+A guide to account naming conventions and email management for AWS Organizations.
+
+This document outlines recommended conventions for AWS account names and email addresses. These conventions apply to new accounts created independently or within an AWS Organization.
+
+While these practices are ideal for initial account setup, they can be implemented and reconfigured at any time in existing accounts.
+
+## **Purpose**
+
+Each AWS account requires a unique email address, which serves as the login for the **Root User**. Protect this account by ensuring:
+
+1. Root user access is limited to essential tasks ([**<u>Root User Tasks</u>**](https://docs.aws.amazon.com/accounts/latest/reference/root-user-tasks.html)).
+2. Email accounts are monitored for notifications, including support and security alerts.
+
+## **Account Naming Conventions**
+
+Establishing a structured naming convention aids in identifying the purpose and ownership of each AWS account. Account names appear in:
+
+- Billing and invoices.
+- AWS Organization Console.
+
+### **Basic Naming Example**
+
+For simple environments, names can reflect the workload:
+
+- Example: `production`
+
+### **Advanced Naming Example**
+
+For complex environments, use a structured convention:
+
+- Format: `{service}-{environment}`
+- Example: `b2cApp-production` or `b2cApp-qa`
+
+### **Tips**
+
+### **Use lowercase for account names to simplify automation.**
+
+- Avoid spaces; use `-` instead of `_` for separators.
+- Choose a naming standard early to avoid tedious renaming later.
+
+## **Email Address Conventions**
+
+Each AWS account must have a globally unique email address. A structured email convention simplifies management, ensuring critical notifications are received and properly routed.
+
+### **Basic Email Example**
+
+For standalone accounts:
+
+- Example: `aws@corp.co`
+
+Avoid personal email addresses for organization-owned accounts. Use an organizational domain (e.g., `@corp.co`) for better control and recovery.
+
+### **Advanced Email Example**
+
+For larger environments:
+
+- Format: `{service}-{environment}@corp.co`
+- Example: [**<u>\`internal-hr@corp.co</u>**](mailto:%60internal-hr@corp.co)
+
+### **Using Email Aliases**
+
+When managing many accounts, use email aliases (e.g., `root+alias@corp.co`) to:
+
+1. Simplify mailbox management.
+2. Centralize communications for easier monitoring.
+
+## **AWS Organizations and Email Management**
+
+When deploying an AWS Organization, each account requires a unique email address. Best practices include:
+
+- Use aliases for child accounts to avoid managing hundreds of separate email accounts.
+- Ensure all root account emails are accessible for notifications and recovery.
+
+### **Example Configuration**
+
+**Root Account**
+
+- Format: `{primary org}-{optional-identifier}`
+- Single-Org Example: `aws@corp.co`
+- Multi-Org Example: `aws-b2cApp@corp.co`
+- Multi-Org Example: `aws-b2bApp@corp.co`
+
+#### **Child Accounts**
+
+- Format: `aws+{service}-{environment}`
+- Single-Org Example: `aws+bc2-prod@corp.co`
+- Multi-Org Example: `aws-bc2+frontend-prod@corp.co`
+
+### **Email Management Options**
+
+**Mailbox (Preferred)**
+
+A centralized mailbox is ideal for:
+
+- Collecting all AWS-related communications in one place.
+- Simplifying monitoring and response.
+
+More details: [**<u>Google Workspace Mailbox</u>**](https://support.google.com/a/users/answer/10375787?hl=en)
+
+**Distribution Lists**
+
+Alternatively, use distribution lists to forward communications to multiple recipients. However:
+
+- Team member changes require manual updates.
+- It may not confirm if someone acted on an email.
+
+More details: [**<u>Google Workspace Distribution Lists</u>**](https://support.google.com/a/answer/9400082?hl=en)
+
+### **Required Mailboxes: Examples**
+
+**Governance Accounts**
+
+1. **Management Account**: `aws@corp.co`
+   - Aliases for:
+     - Audit: `aws+audit@corp.co`
+     - Log Archive: `aws+log@corp.co`
+     - Shared Services: `aws+shared@corp.co`
+     - Networking: `aws+network@corp.co`
+     - Multi-Org Example: `aws-b2c+network@corp.co`
+2. **Service Accounts**:
+   - Single-Org Example: `aws+b2c-prod@corp.co`
+   - Multi-Org Example: `aws-b2c+frontend-dev@corp.co`
+
+## **Conclusion**
+
+Following these conventions ensures efficient management of AWS accounts and communication channels while enabling scalability and compliance. Establish these standards early to avoid future complexities.

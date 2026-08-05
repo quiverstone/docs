@@ -1,0 +1,113 @@
+---
+title: "AWS Regions & Partitions"
+---
+
+Overview of AWS partitions and their associated regions, customers, and compliance requirements.
+
+> **_Disclaimer: The information provided about AWS regions and partitions is intended for general reference and may not reflect the most current configurations, availability, or compliance standards. AWS regularly updates its services, regions, and partitions to meet evolving customer needs. For the most accurate and up-to-date details, consult the AWS Regional Services List, AWS Documentation, or the AWS Management Console. Availability and features may vary based on your account configuration and region._**
+
+AWS organizes its services into various **regions** and **partitions** to meet specific use cases, including regulatory requirements, security, and geographic preferences. This guide provides an overview of AWS partitions and their associated regions, customers, and use cases.
+
+---
+
+## **AWS Partitions**
+
+### **1. AWS Commercial - Partition (**`aws`**)**
+
+The **aws** partition, also called the "Commercial" partition, is the largest and most widely used part of AWS, serving commercial customers globally.
+
+- **Purpose**: Supports general-purpose workloads, including websites, applications, databases, and enterprise software.
+- **Customers**: Businesses, individuals, and institutions worldwide.
+- **Regions**:
+  - **North America**: US East (N. Virginia, Ohio), US West (N. California, Oregon), Canada (Central)
+  - **Europe**: Ireland, Frankfurt, London, Milan, Paris, Stockholm
+  - **Asia-Pacific**: Singapore, Sydney, Tokyo, Seoul, Mumbai, Hong Kong, Jakarta, Osaka
+  - **Middle East**: Bahrain, UAE
+  - **Africa**: Cape Town
+  - **South America**: São Paulo
+- **Security & Compliance**: Certifications like **ISO**, **SOC 1, 2, 3**, **HIPAA**, and **GDPR**.
+- **Use Cases**: E-commerce, SaaS applications, business intelligence, big data, machine learning, and enterprise software.
+
+---
+
+### **2. AWS China (Mainland) - Partition (**`aws-cn`**)**
+
+The **aws-cn** partition is an isolated environment specifically for the **People's Republic of China**.
+
+- **Purpose**: Operates under China's cybersecurity and data residency laws.
+- **Customers**: Organizations needing compliance with China's regulations.
+- **Regions**:
+  - **Beijing**: Operated by **Sinnet**.
+  - **Ningxia**: Operated by **NWCD**.
+- **Security & Compliance**: Compliance with Chinese regulations like **MLPS** and the **Cybersecurity Law**.
+- **Use Cases**: Hosting services in China with adherence to local laws.
+
+---
+
+### **3. AWS GovCloud (US) - Partition (**`aws-us-gov`**)**
+
+AWS GovCloud is designed for U.S. government agencies and customers with strict compliance requirements.
+
+- **Purpose**: Handles sensitive but unclassified or moderately classified data.
+- **Regions**: **GovCloud (US-East)** and **GovCloud (US-West)**.
+- **Compliance**: Meets U.S. government standards like **FedRAMP**, **ITAR**, and **DoD SRG**.
+- **Customers**: U.S. government agencies, contractors, and regulated industries.
+- **Use Cases**: Defense, healthcare, and financial workloads requiring high-security compliance.
+
+---
+
+### **4. AWS ISO - Partition (**`aws-iso`**)**
+
+The **aws-iso** partition is designed for highly regulated U.S. government workloads.
+
+- **Purpose**: Supports workloads needing stringent security and compliance standards beyond GovCloud.
+- **Customers**: U.S. government agencies and contractors handling sensitive data.
+- **Security**: Meets higher standards than GovCloud, such as **FedRAMP High** and **DoD SRG**.
+
+---
+
+### **5. AWS ISO-B - Partition (**`aws-iso-b`**)**
+
+The **aws-iso-b** partition handles **Top Secret** or highly classified information.
+
+- **Purpose**: Serves U.S. national security and defense agencies requiring maximum security.
+- **Customers**: Restricted to specific U.S. government entities.
+- **Security**: Adheres to the strictest compliance frameworks, including **DoD SRG Levels 5 and 6**.
+
+---
+
+### **6. AWS Secret - Partition (**`aws-us-secret`**)**
+
+The **aws-us-secret** partition is designed for handling **Secret-level classified information**.
+
+- **Purpose**: Supports workloads requiring **Secret-level** security.
+- **Customers**: U.S. government agencies involved in defense and intelligence.
+- **Security & Compliance**: Meets **DoD SRG Level 5** and other U.S. standards.
+
+---
+
+### **7. AWS Top Secret - Partition (**`aws-us-topsecret`**)**
+
+The **aws-us-topsecret** partition is designed for **Top Secret** classified information.
+
+- **Purpose**: Handles the most sensitive and classified workloads.
+- **Customers**: U.S. intelligence, defense, and national security agencies.
+- **Security & Compliance**: Meets **DoD SRG Level 6** for Top Secret data.
+
+---
+
+## **Comparison of AWS Partitions**
+
+| **Partition** | **Use Case** | **Primary Customer** | **Regions** |
+| :-- | :-- | :-- | :-- |
+| **aws (Commercial)** | General-purpose cloud services | Businesses, developers, individuals | Global |
+| **aws-cn (China)** | Compliant cloud services for China | Companies operating in China | China (Beijing, Ningxia) |
+| **aws-us-gov (GovCloud)** | Sensitive U.S. government workloads | U.S. government, contractors | GovCloud (US-East, US-West) |
+| **aws-iso** | Highly regulated U.S. government workloads | U.S. government agencies handling sensitive data | Isolated (non-disclosed) |
+| **aws-iso-b** | Top Secret U.S. government workloads | U.S. national security and intelligence agencies | Isolated (non-disclosed) |
+| **aws-us-secret** | Secret-level U.S. government workloads | U.S. defense, intelligence, security | Isolated (non-disclosed) |
+| **aws-us-topsecret** | Top Secret U.S. government workloads | U.S. intelligence, defense | Isolated (non-disclosed) |
+
+---
+
+Each AWS partition is tailored to meet the specific security, compliance, and operational needs of its customers, from global commercial enterprises to highly classified government workloads.
