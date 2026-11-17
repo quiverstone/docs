@@ -127,6 +127,12 @@
             ]
           },
           {
+            "group": "Client Onboarding",
+            "pages": [
+              "consulting/client-onboarding/aws-account-access"
+            ]
+          },
+          {
             "group": "Core Services",
             "pages": [
               "consulting/strategic-consulting",

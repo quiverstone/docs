@@ -1,0 +1,248 @@
+---
+title: "Grant AWS Account Access"
+description: "Deploy a Quiverstone access role in your AWS account so the Quiverstone consulting team can support your engagement"
+---
+
+Before the Quiverstone consulting team can begin hands-on work, you need to deploy an IAM role in each AWS account in scope for the engagement. The role is created by you, in your account, with the permissions you choose, and you can remove it at any time by deleting the CloudFormation stack.
+
+This page walks you through:
+
+1. Generating an **External ID**
+2. Deploying the **Direct Access Role** (recommended)
+3. Collecting the **Role ARN** and sending it, with the External ID, to Quiverstone Support
+
+A **Browser Access Role** is also available as a fallback, but it cannot use an External ID and is not the preferred option.
+
+## Which role should I deploy?
+
+| | **Direct Access Role** (Recommended) | **Browser Access Role** |
+| :-- | :-- | :-- |
+| **Template** | [direct-access-role.yaml](https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role.yaml) | [browser-access-role.yaml](https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml) |
+| **Who can assume the role** | Quiverstone production account (`684035162433`) only | Any principal in the trusted account ID you enter |
+| **External ID support** | Yes | **No** |
+| **Protection against confused deputy attacks** | Yes, via External ID | No |
+| **Access method** | Programmatic (STS AssumeRole) and console | Console "Switch Role" only |
+
+<Note>
+**We recommend the Direct Access Role.** It lets you require an **External ID**, a shared secret that must be presented every time the role is assumed. Even if someone learns your Role ARN, they cannot assume the role without the External ID. The Browser Access Role relies on AWS console role switching, which does not support External IDs at all.
+</Note>
+
+## Before you begin
+
+- Sign in to the AWS Management Console for the account you want to grant access to, with permissions to create IAM roles and CloudFormation stacks (for example, `AdministratorAccess`).
+- Confirm with your Quiverstone consultant which **permission level** the engagement requires. This is defined in your Statement of Work. When in doubt, start with **Read Only Access**.
+- If more than one account is in scope, repeat this process in each account, using a **different External ID** for each.
+
+---
+
+## Option 1: Direct Access Role (Recommended)
+
+<Steps>
+  <Step title="Generate an External ID">
+    An External ID is a long random string that you create and share only with Quiverstone Support. AWS accepts 2 to 1,224 characters made of letters, numbers, and the symbols `+ = , . @ : / -`. We recommend **at least 32 characters**.
+
+    Use any **one** of the methods below to generate one.
+
+    **AWS CloudShell, macOS, or Linux**
+
+    ```bash
+    openssl rand -hex 32
+    ```
+
+    **Windows PowerShell**
+
+    ```powershell
+    -join ((1..32) | ForEach-Object { '{0:x2}' -f (Get-Random -Maximum 256) })
+    ```
+
+    **Python (any platform)**
+
+    ```bash
+    python3 -c "import secrets; print(secrets.token_hex(32))"
+    ```
+
+    **Password manager**: Most password managers (1Password, Bitwarden, LastPass, etc.) can generate a random 64-character password. Choose letters and numbers only.
+
+    Each method produces a value similar to:
+
+    ```text
+    9f2c4e7a1b8d3f6e0a5c9b2d7e4f1a8c3b6d9e2f5a0c7b4d1e8f3a6c9b2d5e7f
+    ```
+
+    <Warning>
+    Do **not** reuse an example value from this page, a password, or a guessable value such as your company name or account ID. Generate a new External ID for every account.
+    </Warning>
+
+    Save the External ID in your password manager or secrets vault. You will paste it into CloudFormation in Step 3 and send it to Quiverstone Support in Step 6.
+  </Step>
+
+  <Step title="Launch the CloudFormation template">
+    While signed in to the target AWS account, click the button below:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role.yaml&stackName=quiverstone-direct-access-role)
+
+    The template is also available to review or download directly: [direct-access-role.yaml](https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/direct-access-role.yaml)
+
+    <Note>
+    The link opens CloudFormation in `us-east-1`. IAM roles are global, so the role works in every Region regardless of where the stack is deployed.
+    </Note>
+  </Step>
+
+  <Step title="Configure the parameters">
+    **Role Name** (`pRoleName`): Default `QuiverstoneDirectAccess`
+    - You may keep the default or choose a custom name. If you change it, include the final name when you contact Quiverstone Support.
+
+    **External ID (Optional)** (`pExternalId`): **Required for consulting engagements**
+    - Paste the External ID you generated in Step 1.
+    - Do not leave this blank. Without it, the role can be assumed from the Quiverstone account without the extra shared secret.
+
+    **Quiverstone Production Account** (`pQuiverstoneProductionAccountId`): Default `684035162433` — **DO NOT MODIFY**
+    - This is the only account allowed to assume the role.
+
+    **Permissions**: Set the access levels agreed in your Statement of Work to `yes`. Leave all others as `no`.
+    - **Read Only Access** (`pIsReadOnlyAccess`): Default `yes`. View resources and configuration without making changes. Suitable for assessments, architecture reviews, and audits.
+    - **View Only Access** (`pIsViewOnlyAccess`): Default `no`. View resource lists and basic metadata only.
+    - **Security Audit** (`pIsSecurityAudit`): Default `no`. Read security configuration and logs.
+    - **Billing Access** (`pIsBillingAccess`): Default `no`. View usage, bills, and cost data. Useful for cost optimization engagements.
+    - **Support User** (`pIsSupportUser`): Default `no`. Troubleshoot and open AWS Support cases.
+    - **System Administrator** (`pIsSystemAdministrator`): Default `no`. Manage resources needed for application operations.
+    - **Power User Access** (`pIsPowerUserAccess`): Default `no`. Full access except IAM user and group management.
+    - **Administrator Access** (`pIsAdministratorAccess`): Default `no`. Full access to all services and resources. Only enable this when the engagement requires hands-on implementation.
+  </Step>
+
+  <Step title="Create the stack">
+    At the bottom of the page, check **I acknowledge that AWS CloudFormation might create IAM resources with custom names**, then click **Create stack**.
+
+    Wait for the stack status to change to **CREATE_COMPLETE** (usually under a minute).
+  </Step>
+
+  <Step title="Collect the Role ARN">
+    **From the AWS Console**
+
+    1. Open the [CloudFormation console](https://console.aws.amazon.com/cloudformation/home) and select the `quiverstone-direct-access-role` stack.
+    2. Open the **Outputs** tab.
+    3. Copy the value of **`oRoleArn`**. It looks like:
+
+    ```text
+    arn:aws:iam::123456789012:role/QuiverstoneDirectAccess
+    ```
+
+    The **Outputs** tab also shows `oRoleName` and, because you set an External ID, `oRoleExternalId`.
+
+    **From the AWS CLI or CloudShell**
+
+    ```bash
+    aws cloudformation describe-stacks \
+      --stack-name quiverstone-direct-access-role \
+      --region us-east-1 \
+      --query "Stacks[0].Outputs[?OutputKey=='oRoleArn'].OutputValue" \
+      --output text
+    ```
+
+    <Note>
+    The `oRoleExternalId` output is visible to anyone in your account who can read CloudFormation stacks. If that is a concern, limit `cloudformation:DescribeStacks` access in the account, and keep your password manager as the source of truth for the value.
+    </Note>
+  </Step>
+
+  <Step title="Send the details to Quiverstone Support">
+    Send the following to [support@quiverstone.io](mailto:support@quiverstone.io), or to your Quiverstone consultant:
+
+    ```text
+    Company name:        <your company>
+    AWS Account ID:      123456789012
+    Account name/alias:  <e.g. production, shared-services>
+    Role type:           Direct Access Role
+    Role ARN:            arn:aws:iam::123456789012:role/QuiverstoneDirectAccess
+    Permissions enabled: <e.g. ReadOnlyAccess, Billing>
+    External ID:         (sent separately, see below)
+    ```
+
+    <Warning>
+    **Send the External ID separately from the Role ARN.** For example, email the Role ARN and share the External ID through a one-time secret link (such as a password manager's secure share feature) or by phone with your consultant. Never post the External ID in a public channel, a ticket comment, or source control.
+    </Warning>
+
+    The Quiverstone team will confirm by replying once they have successfully assumed the role.
+  </Step>
+</Steps>
+
+---
+
+## Option 2: Browser Access Role (Fallback)
+
+Use this option only if your security policy does not allow the Direct Access Role. The Browser Access Role lets a user signed in to a **trusted AWS account** switch into your account from the AWS console.
+
+<Warning>
+**The Browser Access Role cannot use an External ID.** Any principal in the trusted account can assume this role. Use the Direct Access Role whenever possible.
+</Warning>
+
+<Steps>
+  <Step title="Get the trusted account ID from Quiverstone Support">
+    Contact [support@quiverstone.io](mailto:support@quiverstone.io) or your Quiverstone consultant and ask for the **Trusted Account ID** to use for browser access.
+
+    <Note>
+    Do **not** enter the Quiverstone production account ID (`684035162433`) here. The Browser Access Role must trust the account that the Quiverstone consulting team signs in to, which Quiverstone Support provides.
+    </Note>
+  </Step>
+
+  <Step title="Launch the CloudFormation template">
+    While signed in to the target AWS account, click the button below:
+
+    [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml&stackName=quiverstone-browser-access-role)
+
+    The template is also available to review or download directly: [browser-access-role.yaml](https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml)
+  </Step>
+
+  <Step title="Configure the parameters">
+    **Role Name** (`pRoleName`): Default `QuiverstoneBrowserSession`
+    - You may keep the default or choose a custom name.
+
+    **Trusted Account ID** (`pTrustedAccountId`): **Required**
+    - Enter the 12-digit account ID provided by Quiverstone Support in Step 1.
+
+    **Permissions**: Set the access levels agreed in your Statement of Work to `yes`. The options are the same as for the [Direct Access Role](#option-1-direct-access-role-recommended).
+
+    <Note>
+    In addition to the permissions you select, this template always attaches a read-only inline policy for AWS Organizations, account information, and AWS Support case visibility.
+    </Note>
+  </Step>
+
+  <Step title="Create the stack">
+    Check **I acknowledge that AWS CloudFormation might create IAM resources with custom names**, then click **Create stack**. Wait for **CREATE_COMPLETE**.
+  </Step>
+
+  <Step title="Collect the Role ARN and send it to Quiverstone Support">
+    In the stack's **Outputs** tab, copy **`oRoleArn`**, or run:
+
+    ```bash
+    aws cloudformation describe-stacks \
+      --stack-name quiverstone-browser-access-role \
+      --region us-east-1 \
+      --query "Stacks[0].Outputs[?OutputKey=='oRoleArn'].OutputValue" \
+      --output text
+    ```
+
+    Send the following to [support@quiverstone.io](mailto:support@quiverstone.io):
+
+    ```text
+    Company name:        <your company>
+    AWS Account ID:      123456789012
+    Account name/alias:  <e.g. production, shared-services>
+    Role type:           Browser Access Role
+    Role ARN:            arn:aws:iam::123456789012:role/QuiverstoneBrowserSession
+    Trusted Account ID:  <the ID Quiverstone Support provided>
+    Permissions enabled: <e.g. ReadOnlyAccess>
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Changing or removing access
+
+- **Change permissions**: In CloudFormation, select the stack, click **Update**, choose **Use existing template**, and change the permission parameters.
+- **Rotate the External ID**: Update the Direct Access Role stack with a newly generated External ID, then send the new value to Quiverstone Support through a secure channel. Access with the old value stops immediately.
+- **Revoke access**: Delete the stack. The IAM role is removed and Quiverstone can no longer access the account. Please let your consultant know when you do this at the end of an engagement.
+
+<Note>
+For full template details, StackSet deployment across an AWS Organization, and troubleshooting, see the [Access Roles Reference](/setup/iam-roles/access).
+</Note>
