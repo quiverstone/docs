@@ -75,12 +75,10 @@ Access to AWS Resources
   - Must be valid IAM role name (alphanumeric and +=,.@-_ characters)
   - Recommendation: Use default unless you have specific naming requirements
 
-- **pExternalId** (String, Optional but Strongly Recommended, Max: 1224 characters)
-  - External ID for intermediate role assumption security
-  - Prevents confused deputy attacks
-  - Generate unique random string (minimum 32 characters)
-  - Store securely - required when configuring Quiverstone
-  - **Recommendation**: ALWAYS use External ID in production
+- **pExternalId** (String, **Required**, Max: 1224 characters)
+  - Your Quiverstone External ID, shown in Quiverstone when you add an organization or account
+  - Quiverstone presents it when assuming this intermediate role (hop 1) — prevents confused deputy attacks
+  - Use the value Quiverstone gives you; do not generate your own
 
 - **pQuiverstoneProductionAccountId** (String, Default: `684035162433`, Required)
   - Quiverstone production account ID that will assume this intermediate role
@@ -316,19 +314,17 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 
 **How It Works**:
 
-1. You generate a unique random string (minimum 32 characters)
-2. You configure it in the CloudFormation template parameter
-3. You provide it to Quiverstone in your organization configuration
-4. Quiverstone must provide the correct External ID when assuming the role
+1. Quiverstone generates one External ID for your workspace and shows it in the app
+2. You enter it in the template's `pExternalId` parameter
+3. Quiverstone presents it every time it assumes the intermediate role
+4. Destination (hop-2) roles may add their own optional External ID
 5. AWS validates the External ID before allowing assumption
 
 **Best Practices**:
 
-- Always use External ID in production
-- Generate cryptographically random strings
-- Use minimum 32 characters (longer is better)
-- Store securely (password manager, secrets manager)
-- Use different External IDs for intermediate and destination roles
+- The intermediate role always requires your Quiverstone External ID
+- For a hop-2 External ID on destination roles, use a cryptographically random string (minimum 32 characters)
+- Store hop-2 External IDs securely (password manager, secrets manager)
 - Rotate periodically for enhanced security
 
 **Security Benefits**:
@@ -353,7 +349,7 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 
 - `pAssumeRoleScope`: `specific-role-any-account`
 - `pDestinationRoleName`: `QuiverstoneChainedOrgInventory`
-- `pExternalId`: Generate unique random string
+- `pExternalId`: Your Quiverstone External ID
 
 **Deployment Steps**:
 
@@ -380,7 +376,7 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 
 - `pAssumeRoleScope`: `specific-role-any-account`
 - `pDestinationRoleName`: `QuiverstoneChainedOrgInventory`
-- `pExternalId`: Generate unique random string
+- `pExternalId`: Your Quiverstone External ID
 
 **Deployment Steps**:
 
@@ -407,7 +403,7 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 
 - `pAssumeRoleScope`: `specific-role-any-account`
 - `pDestinationRoleName`: `QuiverstoneChainedAccess`
-- `pExternalId`: Generate unique random string
+- `pExternalId`: Your Quiverstone External ID
 
 **Deployment Steps**:
 
@@ -434,7 +430,7 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 - `pAssumeRoleScope`: `specific-account-and-role`
 - `pDestinationAccountId`: Your management account ID
 - `pDestinationRoleName`: `QuiverstoneChainedOrgInventory`
-- `pExternalId`: Generate unique random string
+- `pExternalId`: Your Quiverstone External ID
 
 **Deployment Steps**:
 
@@ -458,7 +454,7 @@ The intermediate role trusts the Quiverstone production account (684035162433) t
 **Recommended Configuration**:
 
 - `pAssumeRoleScope`: `any-role-any-account`
-- `pExternalId`: Generate unique random string
+- `pExternalId`: Your Quiverstone External ID
 - Ensure intermediate account has strong security controls
 
 **Deployment Steps**:
@@ -573,9 +569,8 @@ Destination roles (access and inventory) support two trust configuration options
 
 **External ID Usage**:
 
-- Always use External ID for intermediate role assumption
-- Generate cryptographically random strings (minimum 32 characters)
-- Use different External IDs for intermediate and destination roles
+- The intermediate role always uses your Quiverstone External ID (required)
+- Optional hop-2 External IDs on destination roles: cryptographically random strings (minimum 32 characters)
 - Store External IDs securely (password manager, AWS Secrets Manager)
 - Rotate periodically for enhanced security
 
