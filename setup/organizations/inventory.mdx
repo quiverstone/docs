@@ -13,6 +13,34 @@ Inventory roles provide read-only access to AWS Organizations, enabling Quiverst
 - Provide read-only access to AWS Organizations API
 - Deploy from management account or delegated administrator account
 
+<Note>
+**Your External ID comes from Quiverstone.** Quiverstone generates one External ID for your workspace and shows it on the **Add Organization** screen. Always use that value where a template asks for your Quiverstone External ID — do not make up your own. Quiverstone presents it every time it assumes a direct role or your intermediate role.
+</Note>
+
+Inventory roles are always assumed by Quiverstone itself, so they come in two variants: **direct** and **chained**. (Browser-session roles are an access-role option only — see [Access Roles](/setup/accounts/access).)
+
+## Deploy from AWS CloudShell (fastest)
+
+Every inventory role can be deployed with one command from [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home). Quiverstone generates the command for you with your External ID filled in: on **Add Organization**, choose **Quick Setup**, or open the **Deploy with AWS CloudShell** panel in Advanced mode.
+
+The command downloads the Quiverstone onboarding script and runs it. The script checks that you are signed in to the right account, deploys a single CloudFormation stack, and prints the role ARN.
+
+```bash
+curl -fsSL https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/scripts/quiverstone-onboard.sh -o quiverstone-onboard.sh && bash quiverstone-onboard.sh --role-type org-inventory --variant direct --external-id <your-quiverstone-external-id> --role-name QuiverstoneInventory --region us-east-1
+```
+
+| Role | Run in | Key flags |
+|---|---|---|
+| Direct org inventory | Management account | `--role-type org-inventory --variant direct --external-id <id>` |
+| Delegated administrator | Delegated admin account | add `--account-type delegated-admin` |
+| Trusted intermediate (chained, step 1) | Your intermediate account | `--role-type intermediate --external-id <id> --assume-scope specific-role-any-account --destination-role-name QuiverstoneInventory` |
+| Chained org inventory (step 2) | Management account | `--role-type org-inventory --variant chained --intermediate-role-arn <arn>` |
+| Standalone account inventory | The standalone account | `--role-type standalone-inventory --external-id <id>` |
+
+<Note>
+The CloudShell region doesn't matter: IAM roles are global, and the stack is created in the region you pass with `--region` (default `us-east-1`). If a download fails, the command stops and names the URL it could not fetch.
+</Note>
+
 ## Direct Inventory Deployment
 
 Direct inventory access is the most common deployment method where Quiverstone directly assumes the inventory role in your organization's management or delegated administrator account.
@@ -25,20 +53,15 @@ Direct inventory access is the most common deployment method where Quiverstone d
   </Step>
 
   <Step title="Configure Essential Parameters">
-    **Role Name** (`pRoleName`): Name for the inventory role (Default: QuiverstoneDirectOrgInventory)
-    
+    **Target Role Name** (`pRoleName`): Name for the inventory role (Default: QuiverstoneInventory)
+
     <Warning>
     **Security Best Practice**: Change the default role name to a custom value unique to your organization. Using default role names makes it easier for unauthorized parties to discover and potentially target your roles.
     </Warning>
 
-    **External ID** (`pExternalId`): Security token for role assumption
-    
-    <Warning>
-    **Required for Production**: Always configure an External ID for production deployments. This prevents confused deputy attacks and unauthorized role assumptions.
-    - Generate a unique random string (minimum 32 characters)
-    - Store securely - you'll need this when configuring Quiverstone
-    - Never share or commit External IDs to version control
-    </Warning>
+    **Account Type** (`pAccountType`): `MANAGEMENT` (default) or `DELEGATED_ADMIN`. Delegated admin omits management-only APIs.
+
+    **External ID** (`pExternalId`): **Required.** Paste your Quiverstone External ID from the Add Organization screen.
   </Step>
 
   <Step title="Create Stack">
@@ -46,13 +69,11 @@ Direct inventory access is the most common deployment method where Quiverstone d
   </Step>
 
   <Step title="Copy Role ARN">
-    From the stack Outputs tab, copy the role ARN (e.g., `arn:aws:iam::123456789012:role/QuiverstoneDirectOrgInventory`)
+    From the stack Outputs tab, copy `oTargetRoleArn` (e.g., `arn:aws:iam::123456789012:role/QuiverstoneInventory`)
   </Step>
 
   <Step title="Configure Quiverstone">
-    In Quiverstone, add the organization using:
-    - Role ARN from the previous step
-    - External ID you configured in the template
+    In Quiverstone, add the organization with the Role ARN from the previous step. Your External ID is applied automatically.
   </Step>
 </Steps>
 
@@ -77,17 +98,16 @@ Chained inventory requires two deployments: first the intermediate role, then th
     **Essential Parameters:**
     - **Role Name** (`pIntermediateRoleName`): Default is QuiverstoneTrustedIntermediate
       <Warning>Change this to a custom role name for enhanced security</Warning>
-    - **External ID** (`pExternalId`): Generate unique random string (minimum 32 characters)
-      <Warning>Required for production - never use default or empty values</Warning>
+    - **External ID** (`pExternalId`): **Required.** Your Quiverstone External ID — Quiverstone presents it on this first hop.
     - **Assume Role Scope** (`pAssumeRoleScope`): Use `specific-role-any-account` (recommended)
-    - **Destination Role Name** (`pDestinationRoleName`): QuiverstoneChainedOrgInventory
+    - **Destination Role Name** (`pDestinationRoleName`): The inventory role name you will use in Step 2 (e.g. QuiverstoneChainedOrgInventory)
       <Warning>Change this to match your custom destination role name</Warning>
 
     <Note>
     If you already have an intermediate role deployed, you can reuse it. Skip to Step 2.
     </Note>
 
-    Copy the intermediate role ARN and External ID from the stack outputs.
+    Copy the intermediate role ARN (`oIntermediateRoleArn`) from the stack outputs.
   </Step>
 
   <Step title="Deploy Chained Inventory Role (Second)">
@@ -96,22 +116,21 @@ Chained inventory requires two deployments: first the intermediate role, then th
     [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/chained-org-inventory-role.yaml&stackName=quiverstone-chained-org-inventory-role)
 
     **Essential Parameters:**
-    - **Role Name** (`pChainedOrgInventoryRoleName`): Default is QuiverstoneChainedOrgInventory
+    - **Inventory Role Name** (`pInventoryRoleName`): Default is QuiverstoneChainedOrgInventory
       <Warning>Change this to a custom role name for enhanced security</Warning>
-    - **External ID** (`pExternalId`): Generate unique random string (can be different from intermediate)
-      <Warning>Required for production - use a different value than the intermediate role External ID</Warning>
+    - **External ID** (`pExternalId`): Optional hop-2 External ID (highly recommended). If you set one, enter the same value as the destination External ID in Quiverstone. Your Quiverstone External ID is already enforced on the intermediate role.
     - **Intermediate Account ID** (`pIntermediateAccountId`): Account ID where intermediate role is deployed
     - **Intermediate Role Name** (`pIntermediateRoleName`): Name of intermediate role (default: QuiverstoneTrustedIntermediate)
       <Warning>Update this if you changed the intermediate role name</Warning>
-    - **Trust Principals** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
+    - **Trust Scope** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
 
-    Copy the chained inventory role ARN from the stack outputs.
+    Copy the chained inventory role ARN (`oTargetRoleArn`) from the stack outputs.
   </Step>
 
   <Step title="Configure Quiverstone">
     In Quiverstone, configure chained inventory access using:
-    - Intermediate role ARN and External ID (from Step 1)
-    - Destination role ARN and External ID (from Step 2)
+    - Intermediate role ARN (from Step 1) — your Quiverstone External ID is applied to it automatically
+    - Destination role ARN (from Step 2), plus its hop-2 External ID if you set one
   </Step>
 </Steps>
 
@@ -121,7 +140,7 @@ For detailed deployment information, see the [Inventory Roles Reference](/setup/
 
 ## Standalone Account Inventory
 
-For AWS accounts that are not part of an organization, you can deploy a standalone account inventory role. This provides basic account information without organization-level discovery.
+For AWS accounts that are not part of an organization, you can deploy a standalone account inventory role (`pRoleName` default QuiverstoneStandaloneAccountInventory, `pExternalId` required). This provides basic account information without organization-level discovery.
 
 For detailed information about standalone account inventory deployment, see the [Inventory Roles Reference](/setup/iam-roles/inventory).
 

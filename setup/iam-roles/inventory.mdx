@@ -39,7 +39,7 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
 
 **Parameters**:
 
-- **pRoleName** (String, Default: `QuiverstoneDirectOrgInventory`)
+- **pRoleName** (String, Default: `QuiverstoneInventory`)
   - Name for the direct organization inventory role
   - Must be unique within the account
   - **Security Best Practice**: Change the default role name to a custom value unique to your organization
@@ -48,18 +48,16 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Required for Production, Max: 1224 characters)
-  - Security token for role assumption
-  - **Required for production environments** - prevents confused deputy attacks
-  - Generate a unique random string (minimum 32 characters)
-  - Store securely - required when configuring Quiverstone
-  - Never share or commit External IDs to version control
+- **pExternalId** (String, **Required**, Max: 1224 characters)
+  - Your Quiverstone External ID, shown in Quiverstone when you add an organization or account
+  - Quiverstone presents it on every role assumption — prevents confused deputy attacks
+  - Use the value Quiverstone gives you; do not generate your own
 
 **Outputs**:
 
-- **oRoleArn**: ARN of the created direct organization inventory role
-- **oRoleExternalId**: External ID for role assumption (if configured)
-- **oRoleName**: Name of the created role
+- **oTargetRoleArn**: ARN of the created direct organization inventory role (use as the Target Role ARN in Quiverstone)
+- **oExternalId**: The External ID configured on the role
+- **oTrustedPrincipal**: The Quiverstone production account principal the role trusts
 
 **Permissions Granted**:
 
@@ -96,11 +94,10 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
   - Must be unique within the account
   - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
-- **pExternalId** (String, Required for Production, Max: 1224 characters)
-  - External ID for role assumption
-  - Can be different from intermediate role External ID
-  - **Required for production** - use a different value than the intermediate role External ID
-  - Generate a unique random string (minimum 32 characters)
+- **pExternalId** (String, Optional — Highly Recommended, Max: 1224 characters)
+  - Optional hop-2 External ID on this destination role
+  - Your Quiverstone External ID is already enforced on the intermediate role (hop 1)
+  - If you set one, enter the same value as the destination/target External ID in Quiverstone
   - Never share or commit External IDs to version control
 
 - **pIntermediateAccountId** (String, Required)
@@ -172,18 +169,16 @@ Quiverstone inventory roles use AWS IAM roles with trust policies that allow Qui
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Required for Production, Max: 1224 characters)
-  - Security token for role assumption
-  - **Required for production environments** - prevents confused deputy attacks
-  - Generate a unique random string (minimum 32 characters)
-  - Store securely - required when configuring Quiverstone
-  - Never share or commit External IDs to version control
+- **pExternalId** (String, **Required**, Max: 1224 characters)
+  - Your Quiverstone External ID, shown in Quiverstone when you add an organization or account
+  - Quiverstone presents it on every role assumption — prevents confused deputy attacks
+  - Use the value Quiverstone gives you; do not generate your own
 
 **Outputs**:
 
-- **oRoleArn**: ARN of the created standalone account inventory role
-- **oRoleExternalId**: External ID for role assumption (if configured)
-- **oRoleName**: Name of the created role
+- **oTargetRoleArn**: ARN of the created standalone account inventory role
+- **oExternalId**: The External ID configured on the role
+- **oTrustedPrincipal**: The Quiverstone production account principal the role trusts
 
 **Permissions Granted**:
 
@@ -586,9 +581,9 @@ Standalone account inventory roles grant read-only access to account-level infor
 
 1. Log into AWS management account
 2. Deploy direct-org-inventory-role.yaml via Quick Launch
-3. Configure External ID parameter (generate secure random string)
-4. Note the role ARN and External ID
-5. Configure Quiverstone with role ARN and External ID
+3. Enter your Quiverstone External ID in the External ID parameter (or run the CloudShell command Quiverstone generates)
+4. Note the role ARN (`oTargetRoleArn`)
+5. Configure Quiverstone with the role ARN
 
 **Benefits**: Simplest setup, direct access, minimal configuration, complete organization visibility
 

@@ -99,12 +99,10 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
   - Quiverstone production account ID
   - **DO NOT MODIFY** this value
 
-- **pExternalId** (String, Required for Production, Max: 1224 characters)
-  - Security token for role assumption
-  - **Required for production environments** — prevents confused deputy attacks
-  - Generate a unique random string (minimum 32 characters)
-  - Store securely — required when configuring Quiverstone
-  - Never share or commit External IDs to version control
+- **pExternalId** (String, **Required**, Max: 1224 characters)
+  - Your Quiverstone External ID, shown in Quiverstone when you add an organization or account
+  - Quiverstone presents it on every role assumption — prevents confused deputy attacks
+  - Use the value Quiverstone gives you; do not generate your own
 
 - **Permission Flags** (yes/no for each):
   - Same permission options as browser access role (see above)
@@ -145,11 +143,10 @@ Quiverstone access roles use AWS IAM roles with trust policies that allow Quiver
   - Must be unique within the account
   - **Security Best Practice**: Change the default role name to a custom value unique to your organization
 
-- **pExternalId** (String, Required for Production, Max: 1224 characters)
-  - External ID for role assumption
-  - Can be different from intermediate role External ID
-  - **Required for production** - use a different value than the intermediate role External ID
-  - Generate a unique random string (minimum 32 characters)
+- **pExternalId** (String, Optional — Highly Recommended, Max: 1224 characters)
+  - Optional hop-2 External ID on this destination role
+  - Your Quiverstone External ID is already enforced on the intermediate role (hop 1)
+  - If you set one, enter the same value as the destination/target External ID in Quiverstone
   - Never share or commit External IDs to version control
 
 - **pIntermediateAccountId** (String, Required)
@@ -874,6 +871,8 @@ External ID is a shared secret between you and Quiverstone that must be provided
 #### External ID Best Practices
 
 **Generation**:
+- Direct roles and the intermediate role use **your Quiverstone External ID** (shown in the app) — do not generate one
+- The guidance below applies to optional hop-2 External IDs on chained destination roles
 - Generate a unique random string for each role or account
 - Minimum length: 32 characters
 - Use cryptographically secure random generation
@@ -1632,8 +1631,9 @@ If you continue to experience issues after following this troubleshooting guide:
 </Warning>
 
 **Best Practices**:
-- Generate cryptographically secure random strings (minimum 32 characters)
-- Use unique External IDs per role or per account
+- Use your Quiverstone External ID on direct and intermediate roles — it is required and Quiverstone always presents it
+- For optional hop-2 External IDs on chained destination roles, generate cryptographically secure random strings (minimum 32 characters)
+- Use unique hop-2 External IDs per role or per account
 - Store External IDs in a secure password manager or secrets management system
 - Never commit External IDs to version control
 - Rotate External IDs periodically (quarterly or annually)

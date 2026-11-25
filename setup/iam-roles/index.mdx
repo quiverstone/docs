@@ -92,6 +92,32 @@ Intermediate roles are deployed as part of chained access setup. See the access 
   </Card>
 </CardGroup>
 
+## Deploy from AWS CloudShell
+
+Every individual-account role in the catalog can be deployed with one command from [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home), signed in to the account that should hold the role. Quiverstone generates the command — with your External ID filled in — from the **Deploy with AWS CloudShell** panels on the Add Organization, Add Account and Role screens.
+
+```bash
+curl -fsSL https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/scripts/quiverstone-onboard.sh -o quiverstone-onboard.sh && bash quiverstone-onboard.sh --role-type <type> [--variant <variant>] [options]
+```
+
+| `--role-type` | `--variant` | Template | Trust and External ID |
+|---|---|---|---|
+| `org-inventory` | `direct` | `inventory/direct-org-inventory-role.yaml` | Quiverstone production account; your Quiverstone External ID **required** |
+| `org-inventory` | `chained` | `inventory/chained-org-inventory-role.yaml` | Your intermediate account/role; optional hop-2 External ID |
+| `standalone-inventory` | — | `inventory/standalone-account-inventory-role.yaml` | Quiverstone production account; External ID **required** |
+| `account-access` | `browser` | `access/browser-access-role.yaml` | An account you sign in to (`--trusted-account-id`); no External ID |
+| `account-access` | `direct` | `access/direct-access-role.yaml` | Quiverstone production account; External ID **required** |
+| `account-access` | `chained` | `access/chained-access-role.yaml` | Your intermediate account/role; optional hop-2 External ID |
+| `intermediate` | — | `intermediate/trusted-intermediate-role.yaml` | Quiverstone production account; External ID **required** |
+
+The script validates every flag, refuses to run in the wrong account (`--expected-account-id`; org inventory also checks the management account), warns if the IAM role name already exists, creates one CloudFormation stack, and prints the role ARN. Run `bash quiverstone-onboard.sh --help` for every option.
+
+<Note>
+**Troubleshooting:** the CloudShell region doesn't matter — IAM roles are global and the stack is created in `--region` (default `us-east-1`). If the download fails (for example `curl: (22) The requested URL returned error: 404`), the command stops and names the URL; contact Quiverstone support. If the deploy fails, the script prints the failing CloudFormation events.
+</Note>
+
+StackSet templates (organization-wide deployment) are launched from the CloudFormation console; see the [Access Roles Reference](/setup/iam-roles/access).
+
 ## Security Features
 
 All Quiverstone IAM roles implement security best practices:

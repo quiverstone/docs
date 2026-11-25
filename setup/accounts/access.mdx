@@ -13,19 +13,42 @@ Access roles provide varying levels of permissions to AWS accounts, from read-on
 - Deploy roles across multiple accounts using StackSets
 - Provide day-to-day operational access to member accounts
 
+<Note>
+**Your External ID comes from Quiverstone.** Quiverstone generates one External ID for your workspace and shows it when you add an account or configure a role. Direct roles and the intermediate role **require** it; do not make up your own. Browser-session roles cannot use an External ID.
+</Note>
+
+## Deploy from AWS CloudShell (fastest)
+
+Every access role can be deployed into an account with one command from [AWS CloudShell](https://console.aws.amazon.com/cloudshell/home) in that account. Quiverstone generates the command for you: open the **Deploy with AWS CloudShell** panel when adding an account or editing an access role.
+
+```bash
+curl -fsSL https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/scripts/quiverstone-onboard.sh -o quiverstone-onboard.sh && bash quiverstone-onboard.sh --role-type account-access --variant direct --external-id <your-quiverstone-external-id> --role-name QuiverstoneDirectAccess --permissions read-only --region us-east-1
+```
+
+| Method | Key flags |
+|---|---|
+| Browser session | `--variant browser --trusted-account-id <account you sign in to>` |
+| Direct | `--variant direct --external-id <your Quiverstone External ID>` |
+| Chained (step 1, intermediate account) | `--role-type intermediate --external-id <id> --assume-scope specific-role-any-account --destination-role-name <role name>` |
+| Chained (step 2, target account) | `--variant chained --intermediate-role-arn <arn>` (optional hop-2 `--external-id`) |
+
+`--permissions` takes a comma list of `read-only`, `view-only`, `security-audit`, `billing`, `support-user`, `system-administrator`, `power-user`, `administrator`. Add `--expected-account-id <id>` to stop if CloudShell is signed in to a different account. The CloudShell region doesn't matter — IAM roles are global and the stack is created in `--region` (default `us-east-1`).
+
 ## Browser Session Deployment
 
 Browser Session is a deployment method where Quiverstone generates the AWS Console Switch Role link for your accounts.
 
 <Steps>
   <Step title="Launch CloudFormation Template">
-    Click the button below to launch the direct access role template in your AWS account:
+    Click the button below to launch the browser access role template in your AWS account:
 
     [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/access/browser-access-role.yaml&stackName=quiverstone-browser-access-role)
   </Step>
 
   <Step title="Configure Essential Parameters">
-    **Role Name** (`pRoleName`): Name for the access role (Default: QuiverstoneBrowserAccess)
+    **Role Name** (`pRoleName`): Name for the access role (Default: QuiverstoneBrowserSession)
+
+    **Trusted Account ID** (`pTrustedAccountId`): The AWS account your users sign in to before switching into this role
     
     <Warning>
     **Security Best Practice**: Change the default role name to a custom value unique to your organization. Using default role names makes it easier for unauthorized parties to discover and potentially target your roles.
@@ -80,14 +103,7 @@ Direct access is the simplest deployment method where Quiverstone directly assum
     **Security Best Practice**: Change the default role name to a custom value unique to your organization. Using default role names makes it easier for unauthorized parties to discover and potentially target your roles.
     </Warning>
 
-    **External ID** (`pExternalId`): Security token for role assumption
-    
-    <Warning>
-    **Required for Production**: Always configure an External ID for production deployments. This prevents confused deputy attacks and unauthorized role assumptions.
-    - Generate a unique random string (minimum 32 characters)
-    - Store securely - you'll need this when configuring Quiverstone
-    - Never share or commit External IDs to version control
-    </Warning>
+    **External ID** (`pExternalId`): **Required.** Paste your Quiverstone External ID. Quiverstone presents it on every role assumption, which prevents confused deputy attacks.
 
     **Permissions**: Enable the access levels you need (default is Read-Only)
     - `pIsReadOnlyAccess`: View all resources without making changes
@@ -109,9 +125,7 @@ Direct access is the simplest deployment method where Quiverstone directly assum
   </Step>
 
   <Step title="Configure Quiverstone">
-    In Quiverstone, add the account using:
-    - Role ARN from the previous step
-    - External ID you configured in the template
+    In Quiverstone, add the account with the Role ARN from the previous step (`oRoleArn`). Your External ID is applied automatically.
   </Step>
 
   <Step title="BONUS: Launch CloudFormation STACKSET">
@@ -143,8 +157,7 @@ Chained access requires two deployments: first the intermediate role, then the d
     **Essential Parameters:**
     - **Role Name** (`pIntermediateRoleName`): Default is QuiverstoneTrustedIntermediate
       <Warning>Change this to a custom role name for enhanced security</Warning>
-    - **External ID** (`pExternalId`): Generate unique random string (minimum 32 characters)
-      <Warning>Required for production - never use default or empty values</Warning>
+    - **External ID** (`pExternalId`): **Required.** Your Quiverstone External ID — Quiverstone presents it on this first hop.
     - **Assume Role Scope** (`pAssumeRoleScope`): Use `specific-role-any-account` (recommended)
     - **Destination Role Name** (`pDestinationRoleName`): QuiverstoneChainedAccess
       <Warning>Change this to match your custom destination role name</Warning>
@@ -164,12 +177,11 @@ Chained access requires two deployments: first the intermediate role, then the d
     **Essential Parameters:**
     - **Role Name** (`pChainedAccessRoleName`): Default is QuiverstoneChainedAccess
       <Warning>Change this to a custom role name for enhanced security</Warning>
-    - **External ID** (`pExternalId`): Generate unique random string (can be different from intermediate)
-      <Warning>Required for production - use a different value than the intermediate role External ID</Warning>
+    - **External ID** (`pExternalId`): Optional hop-2 External ID (highly recommended). If you set one, enter it as the Target External ID in Quiverstone. Your Quiverstone External ID is already enforced on the intermediate role.
     - **Intermediate Account ID** (`pIntermediateAccountId`): Account ID where intermediate role is deployed
     - **Intermediate Role Name** (`pIntermediateRoleName`): Name of intermediate role (default: QuiverstoneTrustedIntermediate)
       <Warning>Update this if you changed the intermediate role name</Warning>
-    - **Trust Principals** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
+    - **Trust Scope** (`pTrustPrincipals`): Use `Named` for enhanced security (recommended)
     - **Permissions**: Enable the access levels you need (default is Read-Only)
     
     <Note>
@@ -181,8 +193,8 @@ Chained access requires two deployments: first the intermediate role, then the d
 
   <Step title="Configure Quiverstone">
     In Quiverstone, configure chained access using:
-    - Intermediate role ARN and External ID (from Step 1)
-    - Destination role ARN and External ID (from Step 2)
+    - Intermediate role ARN (from Step 1) — your Quiverstone External ID is applied to it automatically
+    - Destination role ARN (from Step 2), plus its hop-2 External ID if you set one
   </Step>
 
   <Step title="BONUS: Launch CloudFormation STACKSET">
@@ -202,18 +214,17 @@ Standalone account inventory is a deployment method where Quiverstone can invent
 
 <Steps>
   <Step title="Launch CloudFormation Template">
-    Click the button below to launch the direct access role template in your AWS account:
+    Click the button below to launch the standalone account inventory role template in your AWS account:
 
     [![Launch Stack](/assets/stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?templateURL=https://s3.us-east-2.amazonaws.com/assets.quiverstone.io/role-catalog/inventory/standalone-account-inventory-role.yaml&stackName=quiverstone-standalone-inventory-role)
   </Step>
 
   <Step title="Configure Essential Parameters">
-    **Role Name** (`pRoleName`): Name for the access role (Default: QuiverstoneStandaloneAccountInventory)
+    **Role Name** (`pRoleName`): Name for the inventory role (Default: QuiverstoneStandaloneAccountInventory)
 
-    **External ID**: Cannot be used with a browser switch role session
+    **External ID** (`pExternalId`): **Required.** Paste your Quiverstone External ID.
 
-    **Permissions**: Enable the access levels you need (default is Read-Only)
-    - `pIsReadOnlyAccess`: View all resources without making changes
+    The role grants read-only account inventory permissions; there are no permission toggles.
   </Step>
 
   <Step title="Create Stack">
@@ -231,7 +242,7 @@ For detailed deployment information including StackSets and all template variant
 
 - **Configure additional accounts**: Repeat the deployment process for other accounts
 - **Adjust permissions**: Modify permission levels as needed for different accounts
-- **Review security**: Ensure External IDs are stored securely
+- **Review security**: Confirm each direct and intermediate role's trust policy uses your Quiverstone External ID
 - **Test access**: Verify Quiverstone can assume the roles successfully
 
 ## Comprehensive Reference
